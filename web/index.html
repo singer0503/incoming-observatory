@@ -98,20 +98,21 @@ renderer.toneMappingExposure = 1.15;
 app.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x03040a, 0.0016);
+scene.fog = new THREE.FogExp2(0x03040a, 0.0006);
 const camera = new THREE.PerspectiveCamera(52, innerWidth / innerHeight, 0.05, 100000);
-camera.position.set(0, 16, 26);
+camera.position.set(0, 26, 42);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
 // cinematic bloom — the main "this is real" upgrade
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.9, 0.5, 0.55);
+// subtle bloom: only the Sun should really glow (high threshold, low strength)
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.45, 0.35, 0.82);
 composer.addPass(bloom);
 
-scene.add(new THREE.AmbientLight(0x2a3650, 0.35));        // dim fill so night sides aren't pure black
-const sunLight = new THREE.PointLight(0xfff2d6, 3.0, 0, 1.4);
+scene.add(new THREE.AmbientLight(0x33405c, 0.5));          // fill so night sides read, terminator stays
+const sunLight = new THREE.PointLight(0xfff2d6, 2.6, 0, 1.3);
 scene.add(sunLight);
 
 // layered starfield with slight colour/size variation
@@ -183,18 +184,24 @@ function pathPoints(el) {
   return pts;
 }
 
-// ---- the Sun: bright core + layered corona glow (bloom does the rest) ----
-const sun = new THREE.Mesh(new THREE.SphereGeometry(0.7, 32, 32), new THREE.MeshBasicMaterial({ color: 0xffe6a8 }));
-sun.add(glowSprite("rgba(255,210,120,0.9)", 3.4));
-sun.add(glowSprite("rgba(255,160,60,0.5)", 7.0));
-scene.add(sun);
-const sunLabel = makeLabel("Sun ☀️", "#ffd27a"); sunLabel.position.set(0, 1.4, 0); sun.add(sunLabel);
-
+// real planetary surface textures (CC, via jsDelivr) — film-grade look, with colour fallbacks
+const TEX = "https://cdn.jsdelivr.net/gh/jeromeetienne/threex.planets@master/images/";
 const texLoader = new THREE.TextureLoader();
+function loadTex(url, onset) { texLoader.load(url, (t) => { t.colorSpace = THREE.SRGBColorSpace; onset(t); }, undefined, () => {}); }
+
+// ---- the Sun: real photosphere texture + modest corona (bloom finishes it) ----
+const sunMat = new THREE.MeshBasicMaterial({ color: 0xffd9a0 });
+loadTex(TEX + "sunmap.jpg", (t) => { sunMat.map = t; sunMat.color.set(0xffffff); sunMat.needsUpdate = true; });
+const sun = new THREE.Mesh(new THREE.SphereGeometry(0.95, 48, 48), sunMat);
+sun.add(glowSprite("rgba(255,205,120,0.55)", 2.6));
+sun.add(glowSprite("rgba(255,150,55,0.25)", 4.4));
+scene.add(sun);
+const sunLabel = makeLabel("Sun ☀️", "#ffd27a"); sunLabel.position.set(0, 1.6, 0); sun.add(sunLabel);
+
 const earthGroup = new THREE.Group(); scene.add(earthGroup);
-const earthMat = new THREE.MeshStandardMaterial({ color: 0x88a8c8, roughness: 1.0, metalness: 0.0 });
-texLoader.load("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/textures/planets/earth_atmos_2048.jpg",
-  (t) => { t.colorSpace = THREE.SRGBColorSpace; earthMat.map = t; earthMat.color.set(0xffffff); earthMat.needsUpdate = true; });
+const earthMat = new THREE.MeshStandardMaterial({ color: 0x335577, roughness: 1.0, metalness: 0.0 });
+loadTex("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/textures/planets/earth_atmos_2048.jpg",
+  (t) => { earthMat.map = t; earthMat.color.set(0xffffff); earthMat.needsUpdate = true; });
 const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 48, 48), earthMat);
 earthGroup.add(earthMesh);
 const atmo = new THREE.Mesh(new THREE.SphereGeometry(0.58, 32, 32),
@@ -203,7 +210,11 @@ earthGroup.add(atmo);
 const earthLabel = makeLabel("Earth 🌍", "#7db2ff"); earthLabel.position.set(0, 0.95, 0); earthGroup.add(earthLabel);
 let earthEl = null;
 
-const PLANET_COLOR = { Mercury: 0x9c8b7a, Venus: 0xd8b46a, Mars: 0xc1502f };
+const PLANET_COLOR = { Mercury: 0x9c8b7a, Venus: 0xd8b46a, Mars: 0xc1502f,
+  Jupiter: 0xd8b48c, Saturn: 0xe3d4a8, Uranus: 0x9fe0e6, Neptune: 0x4f6cd8 };
+const PLANET_TEX = { Mercury: TEX+"mercurymap.jpg", Venus: TEX+"venusmap.jpg", Mars: TEX+"marsmap1k.jpg",
+  Jupiter: TEX+"jupitermap.jpg", Saturn: TEX+"saturnmap.jpg", Uranus: TEX+"uranusmap.jpg", Neptune: TEX+"neptunemap.jpg" };
+const PLANET_SIZE = { Mercury: 0.18, Venus: 0.30, Mars: 0.24, Jupiter: 0.95, Saturn: 0.82, Uranus: 0.60, Neptune: 0.58 };
 const pickable = [];
 const orbitBodies = [];
 const layers = {
@@ -225,14 +236,20 @@ function buildOrbits(data) {
     if (b.kind === "planet" && b.name === "Earth") { earthEl = b.elements; return; }
     const isPlanet = b.kind === "planet", isISO = b.kind === "interstellar";
     const colHex = isPlanet ? (PLANET_COLOR[b.name] || 0x9fb3c8) : isISO ? 0x9f86ff : new THREE.Color(levelColor(b.attrs && b.attrs.level)).getHex();
-    const size = isPlanet ? 0.28 : isISO ? 0.16 : Math.min(0.45, 0.08 + (b.attrs && b.attrs.diameter_km || 0.05) * 0.2);
-    const mat = isPlanet
-      ? new THREE.MeshStandardMaterial({ color: colHex, roughness: 0.95, metalness: 0.0 })
-      : new THREE.MeshBasicMaterial({ color: colHex });
-    const mesh = new THREE.Mesh(new THREE.SphereGeometry(size, isPlanet ? 32 : 14, isPlanet ? 32 : 14), mat);
-    if (!isPlanet) mesh.add(glowSprite(isISO ? "rgba(160,134,255,0.9)" : "rgba(255,90,70,0.8)", size * 6));
+    const size = isPlanet ? (PLANET_SIZE[b.name] || 0.3) : isISO ? 0.15 : Math.min(0.4, 0.08 + (b.attrs && b.attrs.diameter_km || 0.05) * 0.2);
+    let mat;
+    if (isPlanet) {
+      mat = new THREE.MeshStandardMaterial({ color: colHex, roughness: 0.95, metalness: 0.0 });
+      if (PLANET_TEX[b.name]) loadTex(PLANET_TEX[b.name], (t) => { mat.map = t; mat.color.set(0xffffff); mat.needsUpdate = true; });
+    } else { mat = new THREE.MeshBasicMaterial({ color: colHex }); }
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(size, isPlanet ? 40 : 12, isPlanet ? 40 : 12), mat);
+    if (isPlanet && b.name === "Saturn") {
+      const ring = new THREE.Mesh(new THREE.RingGeometry(size * 1.35, size * 2.2, 56),
+        new THREE.MeshBasicMaterial({ color: 0xcab98a, side: THREE.DoubleSide, transparent: true, opacity: 0.7 }));
+      ring.rotation.x = Math.PI / 2 + 0.22; mesh.add(ring);
+    }
     const path = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pathPoints(b.elements)),
-      new THREE.LineBasicMaterial({ color: colHex, transparent: true, opacity: isPlanet ? 0.42 : 0.22 }));
+      new THREE.LineBasicMaterial({ color: colHex, transparent: true, opacity: isPlanet ? 0.4 : 0.18 }));
     mesh.userData = bodyDetail(b);
     if (isPlanet) {
       scene.add(mesh, path); pickable.push(mesh);

@@ -33,6 +33,15 @@ def test_mars_distance_in_range():
     assert 1.38 <= r <= 1.67  # Mars perihelion ~1.38, aphelion ~1.67 au
 
 
+def test_all_eight_planets_within_expected_distance():
+    expect = {"Mercury": (0.30, 0.47), "Venus": (0.71, 0.74), "Earth": (0.98, 1.02),
+              "Mars": (1.38, 1.67), "Jupiter": (4.9, 5.5), "Saturn": (9.0, 10.1),
+              "Uranus": (18.2, 20.1), "Neptune": (29.7, 30.4)}
+    for name, (lo, hi) in expect.items():
+        r = _r(eph.planet_xyz(name, eph.J2000))
+        assert lo <= r <= hi, f"{name} at {r:.2f} au out of [{lo}, {hi}]"
+
+
 def test_bennu_within_perihelion_aphelion():
     # SBDB elements for 101955 Bennu (a=1.13, e=0.204).
     b = {"a": 1.13, "e": 0.204, "i": 6.03, "om": 2.06, "w": 66.2, "ma": 102,
