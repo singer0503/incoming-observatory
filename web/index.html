@@ -94,7 +94,7 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
+renderer.toneMappingExposure = 1.05;
 app.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
@@ -110,7 +110,7 @@ controls.maxDistance = 6000;
 
 // real Milky Way backdrop (three.js example panorama) — falls back to plain starfield
 new THREE.TextureLoader().load(
-  "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/textures/2294472375_24a3b8ef46_o.jpg",
+  "https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/textures/2294472375_24a3b8ef46_o.jpg",
   (t) => { t.mapping = THREE.EquirectangularReflectionMapping; t.colorSpace = THREE.SRGBColorSpace; scene.background = t; },
   undefined, () => {});
 
@@ -118,7 +118,7 @@ new THREE.TextureLoader().load(
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 // subtle bloom: only the Sun should really glow (high threshold, low strength)
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.45, 0.35, 0.82);
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.34, 0.32, 0.86);
 composer.addPass(bloom);
 
 scene.add(new THREE.AmbientLight(0x33405c, 0.5));          // fill so night sides read, terminator stays
@@ -199,12 +199,12 @@ const TEX = "https://cdn.jsdelivr.net/gh/jeromeetienne/threex.planets@master/ima
 const texLoader = new THREE.TextureLoader();
 function loadTex(url, onset) { texLoader.load(url, (t) => { t.colorSpace = THREE.SRGBColorSpace; onset(t); }, undefined, () => {}); }
 
-// ---- the Sun: real photosphere texture + modest corona (bloom finishes it) ----
-const sunMat = new THREE.MeshBasicMaterial({ color: 0xffd9a0 });
-loadTex(TEX + "sunmap.jpg", (t) => { sunMat.map = t; sunMat.color.set(0xffffff); sunMat.needsUpdate = true; });
-const sun = new THREE.Mesh(new THREE.SphereGeometry(0.95, 48, 48), sunMat);
-sun.add(glowSprite("rgba(255,205,120,0.55)", 2.6));
-sun.add(glowSprite("rgba(255,150,55,0.25)", 4.4));
+// ---- the Sun: molten-orange photosphere + warm corona (bloom finishes it) ----
+const sunMat = new THREE.MeshBasicMaterial({ color: 0xff7a1e });   // orange tint -> lava look, not white blow-out
+loadTex(TEX + "sunmap.jpg", (t) => { sunMat.map = t; sunMat.color.set(0xff8c2e); sunMat.needsUpdate = true; });
+const sun = new THREE.Mesh(new THREE.SphereGeometry(0.85, 48, 48), sunMat);
+sun.add(glowSprite("rgba(255,135,40,0.55)", 2.4));
+sun.add(glowSprite("rgba(255,80,15,0.22)", 4.4));
 scene.add(sun);
 const sunLabel = makeLabel("Sun", "#ffd27a"); sunLabel.position.set(0, 1.6, 0); sun.add(sunLabel);
 
@@ -213,6 +213,7 @@ const earthMat = new THREE.MeshStandardMaterial({ color: 0x335577, roughness: 1.
 loadTex("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/textures/planets/earth_atmos_2048.jpg",
   (t) => { earthMat.map = t; earthMat.color.set(0xffffff); earthMat.needsUpdate = true; });
 loadTex(TEX + "earthbump1k.jpg", (t) => { earthMat.bumpMap = t; earthMat.bumpScale = 0.04; earthMat.needsUpdate = true; });
+loadTex(TEX + "earthlights1k.jpg", (t) => { earthMat.emissiveMap = t; earthMat.emissive.set(0xffd9a0); earthMat.emissiveIntensity = 0.9; earthMat.needsUpdate = true; });
 const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 64, 64), earthMat);
 earthGroup.add(earthMesh);
 // cloud layer (rotates a touch faster than the surface)
