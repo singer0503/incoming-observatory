@@ -61,7 +61,7 @@
 <div id="layers" class="panel"><h2>Layers · 圖層</h2><div id="layerList"></div></div>
 <div id="detail" class="panel"><span class="close" onclick="this.parentNode.style.display='none'">✕</span>
   <h3 id="d-title"></h3><div id="d-cat"></div><div id="d-body"></div><div class="why" id="d-why"></div></div>
-<div id="tip">drag to orbit · scroll to zoom · click any object</div>
+<div id="tip">drag to orbit · right-drag / two-finger to pan · scroll to zoom · click any object</div>
 <div id="views" class="panel" style="padding:0;border:none;background:none">
   <button data-view="sun" class="on">☀️ Sun view</button>
   <button data-view="earth">🌍 Earth view</button>
@@ -103,6 +103,16 @@ const camera = new THREE.PerspectiveCamera(52, innerWidth / innerHeight, 0.05, 1
 camera.position.set(0, 26, 42);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
+controls.enablePan = true;            // free camera: right-drag / two-finger to move
+controls.screenSpacePanning = true;
+controls.minDistance = 1.2;
+controls.maxDistance = 6000;
+
+// real Milky Way backdrop (three.js example panorama) — falls back to plain starfield
+new THREE.TextureLoader().load(
+  "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/textures/2294472375_24a3b8ef46_o.jpg",
+  (t) => { t.mapping = THREE.EquirectangularReflectionMapping; t.colorSpace = THREE.SRGBColorSpace; scene.background = t; },
+  undefined, () => {});
 
 // cinematic bloom — the main "this is real" upgrade
 const composer = new EffectComposer(renderer);
@@ -196,18 +206,24 @@ const sun = new THREE.Mesh(new THREE.SphereGeometry(0.95, 48, 48), sunMat);
 sun.add(glowSprite("rgba(255,205,120,0.55)", 2.6));
 sun.add(glowSprite("rgba(255,150,55,0.25)", 4.4));
 scene.add(sun);
-const sunLabel = makeLabel("Sun ☀️", "#ffd27a"); sunLabel.position.set(0, 1.6, 0); sun.add(sunLabel);
+const sunLabel = makeLabel("Sun", "#ffd27a"); sunLabel.position.set(0, 1.6, 0); sun.add(sunLabel);
 
 const earthGroup = new THREE.Group(); scene.add(earthGroup);
-const earthMat = new THREE.MeshStandardMaterial({ color: 0x335577, roughness: 1.0, metalness: 0.0 });
+const earthMat = new THREE.MeshStandardMaterial({ color: 0x335577, roughness: 1.0, metalness: 0.05 });
 loadTex("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/textures/planets/earth_atmos_2048.jpg",
   (t) => { earthMat.map = t; earthMat.color.set(0xffffff); earthMat.needsUpdate = true; });
-const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 48, 48), earthMat);
+loadTex(TEX + "earthbump1k.jpg", (t) => { earthMat.bumpMap = t; earthMat.bumpScale = 0.04; earthMat.needsUpdate = true; });
+const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 64, 64), earthMat);
 earthGroup.add(earthMesh);
-const atmo = new THREE.Mesh(new THREE.SphereGeometry(0.58, 32, 32),
-  new THREE.MeshBasicMaterial({ color: 0x4aa3ff, transparent: true, opacity: 0.16, side: THREE.BackSide, blending: THREE.AdditiveBlending }));
+// cloud layer (rotates a touch faster than the surface)
+const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, depthWrite: false });
+const earthClouds = new THREE.Mesh(new THREE.SphereGeometry(0.515, 48, 48), cloudMat);
+loadTex(TEX + "earthcloudmap.jpg", (t) => { cloudMat.alphaMap = t; cloudMat.needsUpdate = true; });
+earthGroup.add(earthClouds);
+const atmo = new THREE.Mesh(new THREE.SphereGeometry(0.6, 32, 32),
+  new THREE.MeshBasicMaterial({ color: 0x4aa3ff, transparent: true, opacity: 0.18, side: THREE.BackSide, blending: THREE.AdditiveBlending }));
 earthGroup.add(atmo);
-const earthLabel = makeLabel("Earth 🌍", "#7db2ff"); earthLabel.position.set(0, 0.95, 0); earthGroup.add(earthLabel);
+const earthLabel = makeLabel("Earth", "#7db2ff"); earthLabel.position.set(0, 0.95, 0); earthGroup.add(earthLabel);
 let earthEl = null;
 
 const PLANET_COLOR = { Mercury: 0x9c8b7a, Venus: 0xd8b46a, Mars: 0xc1502f,
@@ -215,6 +231,7 @@ const PLANET_COLOR = { Mercury: 0x9c8b7a, Venus: 0xd8b46a, Mars: 0xc1502f,
 const PLANET_TEX = { Mercury: TEX+"mercurymap.jpg", Venus: TEX+"venusmap.jpg", Mars: TEX+"marsmap1k.jpg",
   Jupiter: TEX+"jupitermap.jpg", Saturn: TEX+"saturnmap.jpg", Uranus: TEX+"uranusmap.jpg", Neptune: TEX+"neptunemap.jpg" };
 const PLANET_SIZE = { Mercury: 0.18, Venus: 0.30, Mars: 0.24, Jupiter: 0.95, Saturn: 0.82, Uranus: 0.60, Neptune: 0.58 };
+const PLANET_BUMP = { Mercury: TEX+"mercurybump.jpg", Venus: TEX+"venusbump.jpg", Mars: TEX+"marsbump1k.jpg" };
 const pickable = [];
 const orbitBodies = [];
 const layers = {
@@ -241,6 +258,7 @@ function buildOrbits(data) {
     if (isPlanet) {
       mat = new THREE.MeshStandardMaterial({ color: colHex, roughness: 0.95, metalness: 0.0 });
       if (PLANET_TEX[b.name]) loadTex(PLANET_TEX[b.name], (t) => { mat.map = t; mat.color.set(0xffffff); mat.needsUpdate = true; });
+      if (PLANET_BUMP[b.name]) loadTex(PLANET_BUMP[b.name], (t) => { mat.bumpMap = t; mat.bumpScale = 0.03; mat.needsUpdate = true; });
     } else { mat = new THREE.MeshBasicMaterial({ color: colHex }); }
     const mesh = new THREE.Mesh(new THREE.SphereGeometry(size, isPlanet ? 40 : 12, isPlanet ? 40 : 12), mat);
     if (isPlanet && b.name === "Saturn") {
@@ -340,9 +358,11 @@ renderer.domElement.addEventListener("click", (e) => {
   document.getElementById("d-why").textContent = u.why || ""; p.style.display = "block";
 });
 
-let view = "sun", playing = true, speed = 1.5, simDays = 0, EPOCH = 0;
+let view = "sun", playing = true, speed = 1.5, simDays = 0, EPOCH = 0, retarget = null;
 document.querySelectorAll("#views button").forEach(b => b.addEventListener("click", () => {
-  view = b.dataset.view; document.querySelectorAll("#views button").forEach(x => x.classList.toggle("on", x===b)); }));
+  view = b.dataset.view; document.querySelectorAll("#views button").forEach(x => x.classList.toggle("on", x===b));
+  // one-shot recenter; afterwards the camera stays free to orbit/pan/zoom
+  retarget = view === "earth" ? earthGroup.position.clone() : new THREE.Vector3(0, 0, 0); }));
 document.getElementById("play").addEventListener("click", function(){ playing=!playing; this.textContent = playing?"⏸":"▶"; });
 document.getElementById("speed").addEventListener("input", e => speed = parseFloat(e.target.value));
 
@@ -367,10 +387,12 @@ const clock = document.getElementById("clock");
   if (playing) simDays += speed * dt * 4;          // speed 1.5 ≈ 6 days / second (gentle)
   const jd = EPOCH + simDays;
   if (earthEl) earthGroup.position.copy(posOf(earthEl, jd));
-  earthMesh.rotation.y += dt * 0.25;
+  earthMesh.rotation.y += dt * 0.22;
+  earthClouds.rotation.y += dt * 0.30;
   orbitBodies.forEach(o => o.mesh.position.copy(posOf(o.el, jd)));
   if (sunwardCone && earthEl) { sunwardCone.position.copy(earthGroup.position).multiplyScalar(0.5); sunwardCone.lookAt(0,0,0); sunwardCone.rotateX(Math.PI/2); }
-  controls.target.lerp(view==="earth"?earthGroup.position:new THREE.Vector3(0,0,0), 0.06);
+  // camera is free; only ease the target when a view preset was just clicked
+  if (retarget) { controls.target.lerp(retarget, 0.12); if (controls.target.distanceTo(retarget) < 0.05) retarget = null; }
   const date = new Date((EPOCH - 2440587.5)*86400000 + simDays*86400000);
   clock.textContent = `T+ ${Math.round(simDays)} d · ${isNaN(date)?"":date.toISOString().slice(0,10)}`;
   controls.update(); composer.render();
