@@ -1,0 +1,21 @@
+{
+  "count": "5",
+  "signature": {"source": "fixture for tests", "version": "1.0"},
+  "data": [
+    {"objectName": "IMPACTX1", "neoScore": 95, "phaScore": 88, "geocentricScore": 0,
+     "tisserandScore": 10, "moid": "0.001", "elong": "150", "vInf": "12.0", "arc": "0.20",
+     "H": "26.0", "nObs": 8},
+    {"objectName": "ARTIFACT9", "neoScore": 5, "phaScore": 2, "geocentricScore": 90,
+     "tisserandScore": 0, "moid": "0.5", "elong": "100", "vInf": null, "arc": "0.05",
+     "H": "30.0", "nObs": 3},
+    {"objectName": "COMETY7", "neoScore": 60, "phaScore": 20, "geocentricScore": 0,
+     "tisserandScore": 70, "moid": "0.3", "elong": "35", "vInf": "45.0", "arc": "0.40",
+     "H": "18.0", "nObs": 6},
+    {"objectName": "PLAINNEO", "neoScore": 72, "phaScore": 14, "geocentricScore": 0,
+     "tisserandScore": 40, "moid": "0.2", "elong": "121", "vInf": null, "arc": "0.30",
+     "H": "17.3", "nObs": 3},
+    {"objectName": "NOISE2", "neoScore": 10, "phaScore": 1, "geocentricScore": 5,
+     "tisserandScore": 5, "moid": "0.8", "elong": "90", "vInf": null, "arc": "0.08",
+     "H": "31.0", "nObs": 2}
+  ]
+}

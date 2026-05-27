@@ -36,7 +36,9 @@
    嚴重度邏輯（Palermo／Torino 等級）你看得到、跑得動、改得了。
    `incoming triage` 則依離心率標記**雙曲線／星際**天體（並算出 v∞）：
    它正確分類出全部三顆已確認的星際訪客 —— 1I/'Oumuamua、2I/Borisov、3I/ATLAS ——
-   也就是「有東西剛從太陽系外面闖進來了」。
+   也就是「有東西剛從太陽系外面闖進來了」。而 `incoming screen` 會盯著尚未確認的新發現
+   **NEOCP firehose**（透過 Scout），把每顆自動分到 撞擊觀察／彗星型／NEO／疑似人造物，
+   讓真正重要的那幾顆從每天的雜訊裡浮出來。
 
 ## 為什麼該有這個東西
 
@@ -84,6 +86,9 @@ incoming triage --live "C/2025 N1"      # 從 JPL SBDB 分類任意天體
 
 # 從 NASA 公開的 Sentry 資料流彙整出開源撞擊風險預警：
 incoming alert --live
+
+# 篩查 NEOCP firehose —— 對每顆剛發現、尚未確認的天體自動 triage：
+incoming screen --live
 ```
 
 > **這裡的「預警時間」是什麼意思** —— 我們定義為*有史以來第一筆觀測 → 撞擊*，由最早的 MPC
@@ -128,6 +133,7 @@ cd web && python -m http.server 8000   # 然後開啟 http://localhost:8000
 - [x] 從 MPC 原始發現觀測**獨立重算**預警時間（反過來驗證官方機構）
 - [x] **開源即時來襲預警**，彙整自 CNEOS Sentry（`incoming alert`）
 - [x] 雙曲線／星際候選 triage，含 v∞（`incoming triage`）
+- [x] 即時 NEOCP firehose 篩查 —— 對未確認新發現自動 triage（`incoming screen`）
 - [ ] 盲區儀表板（太陽方向／長週期彗星／星際）
-- [ ] 即時 NEOCP firehose 篩查（對未確認天體自動跑 triage）
+- [ ] 進入 IMPACT-WATCH 或被標記星際時，email／webhook 推播
 - [ ] 簽章、可復現的資料釋出

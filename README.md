@@ -38,7 +38,9 @@ Three things, all built on **public** data (NASA/JPL CNEOS, the Minor Planet Cen
    of those feeds — transparent severity logic (Palermo/Torino scales) you can read, run, and extend.
    `incoming triage` flags **hyperbolic / interstellar** objects by eccentricity (and computes v∞):
    it correctly classifies all three confirmed interstellar visitors — 1I/'Oumuamua, 2I/Borisov,
-   3I/ATLAS — i.e. "something just arrived from outside the solar system."
+   3I/ATLAS — i.e. "something just arrived from outside the solar system." And `incoming screen`
+   watches the **NEOCP firehose** of unconfirmed new discoveries (via Scout), auto-sorting each into
+   IMPACT-WATCH / cometary / NEO / likely-artifact so the few that matter surface from the daily noise.
 
 ## Why this should exist
 
@@ -89,6 +91,9 @@ incoming triage --live "C/2025 N1"      # classify any object from JPL SBDB
 
 # Open impact-risk alerts aggregated from NASA's public Sentry feed:
 incoming alert --live
+
+# Screen the NEOCP firehose — auto-triage every newly-discovered, unconfirmed object:
+incoming screen --live
 ```
 
 > **What "warning time" means here** — we define it as *first-ever observation → impact*, computed
@@ -135,6 +140,7 @@ the blind-spot dashboard, and the open alert layer are next — see [the plan](#
 - [x] Recompute warning time independently from raw MPC discovery observations (verify the agencies)
 - [x] **Open imminent-impactor alert** aggregated from CNEOS Sentry (`incoming alert`)
 - [x] Hyperbolic / interstellar candidate triage with v∞ (`incoming triage`)
+- [x] Live NEOCP firehose screening — auto-triage unconfirmed discoveries (`incoming screen`)
 - [ ] Blind-spot dashboard (sunward / long-period comet / interstellar)
-- [ ] Live NEOCP firehose screening (auto-run triage on unconfirmed objects)
+- [ ] Email/webhook push when an object enters IMPACT-WATCH or is flagged interstellar
 - [ ] Signed, reproducible data releases

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from incoming import alert as alert_mod
 from incoming import recompute as recompute_mod
+from incoming import screen as screen_mod
 from incoming import triage as triage_mod
 from incoming import warning_time
 
@@ -38,6 +39,11 @@ def main(argv: list[str] | None = None) -> int:
     p_al.add_argument("--live", action="store_true", help="fetch the live Sentry feed")
     p_al.add_argument("--limit", type=int, default=15, help="rows to print")
 
+    p_sc = sub.add_parser(
+        "screen", help="screen the NEOCP firehose of unconfirmed new discoveries (CNEOS Scout)"
+    )
+    p_sc.add_argument("--live", action="store_true", help="fetch the live Scout/NEOCP feed")
+
     args = ap.parse_args(argv)
 
     if args.cmd == "ledger":
@@ -54,6 +60,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.cmd == "alert":
         alert_mod.build_alerts(live=args.live, limit=args.limit)
+        return 0
+    if args.cmd == "screen":
+        screen_mod.run(live=args.live)
         return 0
     return 1
 
