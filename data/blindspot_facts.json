@@ -1,0 +1,91 @@
+{
+  "_note": "Curated, sourced facts for the three detection blind spots. Hero/example numbers from our own datasets are computed by src/incoming/blindspots.py and merged under 'computed'. Every literature fact carries a source link. 'plain' fields explain it for a general audience.",
+  "glossary": [
+    {"term": "warning time", "plain": "How long before impact we first spotted the object. We want this big; reality is usually a few hours.", "plain_zh": "預警時間：撞擊前我們提前多久看到它。希望越長越好，現實往往只有幾小時。"},
+    {"term": "eccentricity (e)", "plain": "How stretched an orbit is. e below 1 = a closed loop around the Sun (stays in our solar system). e above 1 = an open path that never comes back — it came from outside.", "plain_zh": "離心率 (e)：軌道有多扁。e 小於 1＝繞太陽的封閉圈（留在太陽系）；e 大於 1＝一條再也不回來的開放路徑——它來自太陽系外。"},
+    {"term": "v∞ (v-infinity)", "plain": "The leftover speed an object still has 'at infinity', far from the Sun's pull. If it's high, the object isn't bound to the Sun — a fingerprint of an interstellar visitor.", "plain_zh": "v∞：物體遠離太陽引力後『在無窮遠處』還剩的速度。數值高＝它不受太陽束縛——這是星際訪客的指紋。"},
+    {"term": "Oort cloud", "plain": "A vast shell of icy bodies at the far edge of the solar system, where most long-period comets fall in from.", "plain_zh": "歐特雲：太陽系最外緣一層巨大的冰質天體殼層，多數長週期彗星都從那裡掉進來。"},
+    {"term": "L1 point", "plain": "A spot between the Earth and the Sun where a telescope can hover and watch the Sun's direction — exactly the part of the sky we're blind to from the ground.", "plain_zh": "L1 點：地球與太陽之間一個可以讓望遠鏡定點停留、朝太陽方向看的位置——正好是地面看不到的那片天空。"}
+  ],
+  "blindspots": [
+    {
+      "id": "sunward",
+      "title": "The Sunward Blind Spot",
+      "title_plain": "Coming out of the Sun",
+      "title_zh": "太陽方向盲區",
+      "icon": "☀️",
+      "color": "#ffcc00",
+      "hero_label": "warning for an object approaching from the Sun's direction",
+      "hero_label_zh": "從太陽方向飛來的天體，我們得到的預警",
+      "plain": "Think of a driver blinded by sunlight — they can't see a car coming straight out of the glare. Our telescopes have the same problem: anything approaching from the Sun's direction is hidden in daylight until it's basically here.",
+      "plain_zh": "想像開車被陽光刺到睜不開眼，正對著光衝來的車你根本看不到。望遠鏡也一樣：從太陽方向飛來的東西藏在白晝強光裡，等你看見，它幾乎已經到了。",
+      "summary": "Ground-based optical telescopes can only search the night sky. An asteroid approaching from the daytime side — its radiant near the Sun — is lost in glare and effectively invisible until it arrives. This is not a funding problem; it is geometry.",
+      "key_facts": [
+        "Chelyabinsk (15 Feb 2013): a ~20 m object, ~0.5 megatonne airburst, ~1,500 injured — and ZERO warning, because it came out of the daytime sky near the Sun.",
+        "The fix has to fly above the atmosphere and look toward the Sun: infrared space telescopes parked at the Sun–Earth L1 point.",
+        "Even the dedicated mission gives only weeks: ESA estimates NEOMIR could spot a ≥ 20 m sunward impactor ≥ 3 weeks ahead — and as little as ~3 days in the worst case."
+      ],
+      "mitigation": [
+        {"name": "NASA NEO Surveyor", "status": "launch no earlier than Sept 2027", "detail": "Infrared space telescope at L1; can look sunward; goal ≥ 2/3 of NEOs larger than 140 m within a 5-year survey.", "url": "https://science.nasa.gov/mission/neo-surveyor/"},
+        {"name": "ESA NEOMIR", "status": "Phase A study; launch early 2030s", "detail": "Infrared telescope at L1 purpose-built for the sunward blind spot and small (≥ 20 m) objects; ≥ 3 weeks warning (worst case ~3 days).", "url": "https://www.esa.int/Space_Safety/Planetary_Defence/NEOMIR_finding_risky_asteroids_outshone_by_the_Sun"}
+      ],
+      "sources": [
+        {"label": "Chelyabinsk meteor (overview)", "url": "https://en.wikipedia.org/wiki/Chelyabinsk_meteor"},
+        {"label": "Phys.org — a decade on the Sun-invisible asteroids", "url": "https://phys.org/news/2023-02-chelyabinsk-decade-sun-invisible-asteroids.amp"},
+        {"label": "NASA NEO Surveyor", "url": "https://science.nasa.gov/mission/neo-surveyor/"},
+        {"label": "ESA NEOMIR", "url": "https://www.esa.int/Space_Safety/Planetary_Defence/NEOMIR_finding_risky_asteroids_outshone_by_the_Sun"}
+      ]
+    },
+    {
+      "id": "long_period_comet",
+      "title": "Long-Period Comets",
+      "title_plain": "Comets falling in from far away",
+      "title_zh": "長週期彗星",
+      "icon": "☄️",
+      "color": "#48c9b0",
+      "hero_label": "typical warning — months, not the decades we get for known asteroids",
+      "hero_label_zh": "典型預警是「數月」——而非已知小行星的數十年",
+      "plain": "Most dangerous asteroids are already nearby, so we can track them for years. These comets, by contrast, drop in from the freezing outer edge of the solar system and only light up when they get close — so we might get just months of notice for something huge moving terrifyingly fast.",
+      "plain_zh": "多數危險小行星本來就在附近，我們能追蹤好幾年。但這些彗星從太陽系冰冷的最外緣掉進來，靠近時才亮起來——所以面對一個又大又快得嚇人的東西，我們可能只有幾個月的通知。",
+      "summary": "Near-Earth asteroids inside the inner solar system can be tracked years to decades ahead. Long-period comets fall in from the Oort cloud on near-parabolic orbits out of the dark outer system, and only become visible when they brighten near the Sun — giving months of warning at most, for objects that are large and arriving at 50–70 km/s.",
+      "key_facts": [
+        "Comet C/2013 A1 (Siding Spring) was discovered less than 22 months before its close pass by Mars — a vivid measure of how little lead time a long-period comet allows.",
+        "They are a small fraction of total impact flux but contribute disproportionately to the un-warnable, high-energy tail (large + very fast).",
+        "Unlike asteroids, you cannot 'survey them in advance' — they spend almost all their time too far and too faint to see."
+      ],
+      "mitigation": [
+        {"name": "Early warning is the only realistic lever", "status": "research", "detail": "With months of notice and 50–70 km/s arrival speeds, deflection is extremely hard; detection + civil response dominate.", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6999729/"}
+      ],
+      "sources": [
+        {"label": "Defending Earth from long-period comets & sneaky asteroids", "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6999729/"},
+        {"label": "Aerospace America — The comet conundrum", "url": "https://aerospaceamerica.aiaa.org/features/the-comet-conundrum/"}
+      ]
+    },
+    {
+      "id": "interstellar",
+      "title": "Interstellar Objects",
+      "title_plain": "Visitors from other star systems",
+      "title_zh": "星際天體",
+      "icon": "🌌",
+      "color": "#7d5fff",
+      "hero_label": "confirmed interstellar visitors ever — all found with little lead time",
+      "hero_label_zh": "有史以來確認過的星際訪客——全都是在很短的預警下才發現",
+      "plain": "Every now and then, something drifts in from another star system entirely — not orbiting our Sun, just passing through. We've confirmed only three, and the very first one was already leaving before we noticed it. This is the real, scientific version of 'something arrived and nobody saw it coming'.",
+      "plain_zh": "偶爾會有東西從另一個恆星系統整個飄進來——不繞我們的太陽，只是路過。我們只確認過三顆，而第一顆在我們注意到時就已經在離開了。這就是「有東西來了卻沒人預測到」最真實、最科學的版本。",
+      "summary": "Objects on unbound, hyperbolic orbits (eccentricity e > 1) are not gravitationally captured by the Sun: they came from interstellar space. Only three have ever been confirmed, and the first (1I/'Oumuamua) was found on its way out. They are faint, fast, and move on tracks that linking pipelines tuned for bound orbits can miss.",
+      "key_facts": [
+        "1I/'Oumuamua (2017) was discovered ~days after its closest approach to Earth — found leaving, not arriving.",
+        "Interstellar origin is read straight off the orbit: e > 1 and a large hyperbolic excess velocity v∞ that no solar-system orbit can have.",
+        "Vera Rubin Observatory / LSST is expected to turn a trickle (~1 per decade historically) into perhaps one every few months."
+      ],
+      "mitigation": [
+        {"name": "Vera Rubin Observatory (LSST)", "status": "survey starting", "detail": "Deep, fast, all-sky cadence expected to dramatically raise the interstellar-object discovery rate.", "url": "https://phys.org/news/2023-11-vera-rubin-observatory-interstellar-year.html"}
+      ],
+      "sources": [
+        {"label": "3I/ATLAS discovery paper (2025)", "url": "https://arxiv.org/pdf/2507.02757"},
+        {"label": "1I/'Oumuamua (overview)", "url": "https://en.wikipedia.org/wiki/1I/%CA%BBOumuamua"},
+        {"label": "Rubin/LSST — interstellar objects per year", "url": "https://phys.org/news/2023-11-vera-rubin-observatory-interstellar-year.html"}
+      ]
+    }
+  ]
+}

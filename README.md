@@ -114,10 +114,18 @@ cd web && python -m http.server 8000   # then open http://localhost:8000
 ```
 
 Three toggleable views, all driven by the real ledger: the **Earth** globe with every pre-impact
-detection drawn as an incoming streak coloured by warning time (and the sunward blind-spot cone);
-the **Solar System** with a schematic interstellar/hyperbolic trajectory; and a zoomed-out
-**Galaxy** view showing where interstellar visitors arrive from. It is a presentation layer over
-real data — it does not render anything we haven't measured.
+detection drawn as an incoming streak coloured by warning time (click one for details, plus the
+sunward blind-spot cone); the **Solar System** with a schematic interstellar/hyperbolic trajectory;
+and a zoomed-out **Galaxy** view showing where interstellar visitors arrive from. It is a
+presentation layer over real data — it does not render anything we haven't measured.
+
+### Blind-spot dashboard (`blindspots.html`)
+
+A plain-language, **bilingual (English / 繁體中文)** dashboard of *why* things slip through —
+the **sunward** blind spot, **long-period comets**, and **interstellar objects** — each with a
+headline number (measured by us or cited), a layperson explanation, the missions being built to
+fix it (NEO Surveyor, NEOMIR, Vera Rubin), a glossary, and a source link on every fact. Build its
+data with `incoming blindspots`; it loads at `blindspots.html` and is linked from the live map.
 
 ## Data sources & attribution
 
@@ -141,6 +149,7 @@ the blind-spot dashboard, and the open alert layer are next — see [the plan](#
 - [x] **Open imminent-impactor alert** aggregated from CNEOS Sentry (`incoming alert`)
 - [x] Hyperbolic / interstellar candidate triage with v∞ (`incoming triage`)
 - [x] Live NEOCP firehose screening — auto-triage unconfirmed discoveries (`incoming screen`)
-- [ ] Blind-spot dashboard (sunward / long-period comet / interstellar)
+- [x] Bilingual, plain-language blind-spot dashboard (`blindspots.html`)
+- [ ] A windy.com-style interactive solar-system map (animated layers, time scrubber, click-anywhere)
 - [ ] Email/webhook push when an object enters IMPACT-WATCH or is flagged interstellar
 - [ ] Signed, reproducible data releases

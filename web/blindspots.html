@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>偵測盲區 · Detection Blind Spots — incoming-observatory</title>
+<style>
+  :root { color-scheme: dark; --bg:#070a12; --card:#0f1626; --line:#22304a; --muted:#93a4bd; --text:#e8eef6; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font:15px/1.65 -apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",system-ui,sans-serif; }
+  a { color:#7db2ff; }
+  .wrap { max-width:1080px; margin:0 auto; padding:0 18px 80px; }
+  header.top { position:sticky; top:0; z-index:10; background:rgba(7,10,18,.85);
+    backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
+  .nav { max-width:1080px; margin:0 auto; padding:12px 18px; display:flex; align-items:center; gap:16px; }
+  .nav .brand { font-weight:700; }
+  .nav a { color:var(--muted); text-decoration:none; padding:6px 10px; border-radius:8px; }
+  .nav a.active, .nav a:hover { color:#fff; background:#15203400; background:#152034; }
+  .nav .spacer { flex:1; }
+  .langtog { display:flex; gap:4px; border:1px solid var(--line); border-radius:999px; padding:3px; }
+  .langtog button { background:none; border:none; color:var(--muted); padding:4px 12px; border-radius:999px; cursor:pointer; }
+  .langtog button.on { background:#c0392b; color:#fff; }
+  .hero { padding:54px 0 26px; }
+  .hero h1 { font-size:40px; line-height:1.15; margin:0 0 10px; }
+  .hero p.lede { font-size:18px; color:var(--muted); max-width:740px; margin:0; }
+  .mission { margin:22px 0 8px; padding:16px 18px; border-left:3px solid #c0392b;
+    background:linear-gradient(90deg,rgba(192,57,43,.12),transparent); border-radius:0 10px 10px 0; }
+  h2.sec { font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+    margin:46px 0 14px; border-bottom:1px solid var(--line); padding-bottom:8px; }
+  /* warning spectrum */
+  .spec .row { display:grid; grid-template-columns:1fr; gap:4px; margin:14px 0; }
+  .spec .lbl { display:flex; justify-content:space-between; gap:10px; }
+  .spec .lbl .t { font-weight:600; }
+  .spec .lbl .v { color:var(--muted); white-space:nowrap; }
+  .spec .track { height:16px; background:#0c1322; border:1px solid var(--line); border-radius:9px; overflow:hidden; }
+  .spec .fill { height:100%; border-radius:9px 0 0 9px; min-width:6px; }
+  .spec .note { font-size:12px; color:var(--muted); }
+  /* cards */
+  .cards { display:grid; grid-template-columns:1fr; gap:20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; overflow:hidden; }
+  .card .band { height:6px; }
+  .card .pad { padding:22px 22px 8px; }
+  .card .head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .card .icon { font-size:30px; }
+  .card h3 { margin:0; font-size:23px; }
+  .card .sub { color:var(--muted); font-size:14px; }
+  .hero-stat { display:flex; align-items:baseline; gap:14px; margin:16px 0 6px; }
+  .hero-stat .big { font-size:46px; font-weight:800; line-height:1; }
+  .hero-stat .lab { color:var(--muted); font-size:14px; max-width:520px; }
+  .plain { font-size:16.5px; background:#0c1322; border:1px solid var(--line); border-radius:12px;
+    padding:14px 16px; margin:10px 0 16px; }
+  .facts { margin:6px 0 14px; padding:0; list-style:none; }
+  .facts li { padding:7px 0 7px 26px; position:relative; color:#d4def0; }
+  .facts li::before { content:"›"; position:absolute; left:6px; color:#ff6b5e; font-weight:700; }
+  .isotable { width:100%; border-collapse:collapse; margin:6px 0 14px; font-size:14px; }
+  .isotable th, .isotable td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); }
+  .isotable th { color:var(--muted); font-weight:600; }
+  .pill { display:inline-block; background:#7d5fff22; color:#b9a6ff; border:1px solid #7d5fff55;
+    border-radius:999px; padding:1px 9px; font-size:12px; }
+  .mit { margin:8px 0 14px; }
+  .mit .item { display:flex; gap:12px; padding:9px 0; border-top:1px dashed var(--line); }
+  .mit .when { color:var(--muted); font-size:13px; min-width:170px; }
+  .mit .what b { display:block; }
+  .src { display:flex; flex-wrap:wrap; gap:8px; padding:6px 22px 20px; }
+  .src a { font-size:12.5px; background:#152034; border:1px solid var(--line); color:#aebfd6;
+    padding:5px 11px; border-radius:999px; text-decoration:none; }
+  .src a:hover { color:#fff; border-color:#39517a; }
+  details.gloss { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:6px 16px; margin:8px 0; }
+  details.gloss summary { cursor:pointer; padding:10px 0; font-weight:600; }
+  .gterm { padding:9px 0; border-top:1px solid var(--line); }
+  .gterm b { color:#ffd23f; }
+  footer { color:var(--muted); font-size:13px; margin-top:50px; border-top:1px solid var(--line); padding-top:18px; }
+  .todetail { color:var(--muted); font-size:13px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <nav class="nav">
+    <span class="brand">🛰 incoming-observatory</span>
+    <a href="index.html">Live Map</a>
+    <a href="blindspots.html" class="active" data-i18n-nav="blind">偵測盲區</a>
+    <span class="spacer"></span>
+    <div class="langtog"><button data-lang="zh" class="on">中文</button><button data-lang="en">EN</button></div>
+  </nav>
+</header>
+
+<div class="wrap">
+  <section class="hero">
+    <h1 data-t="title">我們有多瞎？</h1>
+    <p class="lede" data-t="lede">人類有史以來在天體撞上地球前就發現它的紀錄，預警都以「小時」計。這個儀表板讓任何人一眼看懂：我們對來襲天體的偵測，到底有哪三個致命盲區。</p>
+    <div class="mission"><span data-t="mission">人類文明還很年輕。我們很可能在能夠移居其他星球、或在太空中獨立生存之前，就被一顆我們從沒看見的石頭結束一切。看清盲區，是補上它的第一步。</span></div>
+  </section>
+
+  <h2 class="sec" data-t="spec_h">提前多久看到？不同類型天體的預警時間（對數刻度）</h2>
+  <div class="spec" id="spec"></div>
+
+  <h2 class="sec" data-t="cards_h">三個偵測盲區</h2>
+  <div class="cards" id="cards"></div>
+
+  <h2 class="sec" data-t="gloss_h">名詞解釋（白話）</h2>
+  <div id="gloss"></div>
+
+  <footer id="foot">資料來源：NASA/JPL CNEOS、IAU 小行星中心、ESA NEOCC，以及下列各引用。每個數字若非我們自行計算，皆附出處連結。</footer>
+</div>
+
+<script>
+const UI = {
+  zh: { title:"我們有多瞎？",
+    lede:"人類有史以來在天體撞上地球前就發現它的紀錄，預警都以「小時」計。這個儀表板讓任何人一眼看懂：我們對來襲天體的偵測，到底有哪三個致命盲區。",
+    mission:"人類文明還很年輕。我們很可能在能夠移居其他星球、或在太空中獨立生存之前，就被一顆我們從沒看見的石頭結束一切。看清盲區，是補上它的第一步。",
+    spec_h:"提前多久看到？不同類型天體的預警時間（對數刻度）",
+    cards_h:"三個偵測盲區", gloss_h:"名詞解釋（白話）",
+    details:"細節與數據", mitig:"我們在怎麼補救", measured:"我們實測", lit:"文獻",
+    foot:"資料來源：NASA/JPL CNEOS、IAU 小行星中心、ESA NEOCC，以及各卡片引用。每個數字若非我們自行計算，皆附出處連結。" },
+  en: { title:"How blind are we?",
+    lede:"Every asteroid humanity has ever spotted before it hit Earth was caught only hours ahead. This dashboard makes the three fatal blind spots in our detection plain to anyone.",
+    mission:"Human civilization is young. We could be ended by a rock we never saw — before we ever become multi-planetary or self-sufficient in space. Seeing the blind spots is the first step to closing them.",
+    spec_h:"How much warning? Warning time by type of object (log scale)",
+    cards_h:"The three blind spots", gloss_h:"Plain-language glossary",
+    details:"The details & data", mitig:"What's being done", measured:"measured by us", lit:"literature",
+    foot:"Data: NASA/JPL CNEOS, IAU Minor Planet Center, ESA NEOCC, plus the citations on each card. Every figure not computed by us carries a source link." }
+};
+let LANG = "zh";
+let DATA = null;
+
+function fmtHours(h) {
+  if (h === 0) return LANG==="zh" ? "0 小時（零預警）" : "0 hours (no warning)";
+  if (h < 48) return LANG==="zh" ? `約 ${h} 小時` : `~${h} h`;
+  if (h < 24*365) return LANG==="zh" ? `約 ${Math.round(h/24/30)} 個月` : `~${Math.round(h/24/30)} months`;
+  return LANG==="zh" ? `約 ${Math.round(h/24/365)} 年` : `~${Math.round(h/24/365)} years`;
+}
+function barColor(h) { return h===0 ? "#ff3b30" : h<48 ? "#ff9500" : h<60000 ? "#48c9b0" : "#2ecc71"; }
+
+function renderSpec() {
+  const max = Math.max(...DATA.warning_spectrum.map(s=>s.hours));
+  const lmax = Math.log10(max);
+  document.getElementById("spec").innerHTML = DATA.warning_spectrum.map(s => {
+    const w = s.hours<=0 ? 1.5 : Math.max(2, Math.log10(s.hours)/lmax*100);
+    const lbl = LANG==="zh" ? (s.label_zh||s.label) : s.label;
+    const note = LANG==="zh" ? (s.note_zh||s.note) : s.note;
+    return `<div class="row"><div class="lbl"><span class="t">${lbl}</span><span class="v">${fmtHours(s.hours)}</span></div>
+      <div class="track"><div class="fill" style="width:${w}%;background:${barColor(s.hours)}"></div></div>
+      <span class="note">${note}</span></div>`;
+  }).join("");
+}
+
+function renderCards() {
+  document.getElementById("cards").innerHTML = DATA.blindspots.map(b => {
+    const title = LANG==="zh" ? (b.title_zh||b.title) : b.title;
+    const heroLab = LANG==="zh" ? (b.hero_label_zh||b.hero_label) : b.hero_label;
+    const plain = LANG==="zh" ? (b.plain_zh||b.plain) : b.plain;
+    let isoTable = "";
+    if (b.id==="interstellar" && b.computed && b.computed.objects) {
+      isoTable = `<table class="isotable"><tr><th>${LANG==="zh"?"天體":"object"}</th><th>e</th><th>v∞ (km/s)</th><th></th></tr>` +
+        b.computed.objects.map(o=>`<tr><td>${o.name}</td><td>${o.e}</td><td>${o.v_inf_km_s??"—"}</td><td><span class="pill">e &gt; 1 ${LANG==="zh"?"星際":"interstellar"}</span></td></tr>`).join("") +
+        `</table>`;
+    }
+    const facts = (b.key_facts||[]).map(f=>`<li>${f}</li>`).join("");
+    const mit = (b.mitigation||[]).map(m=>`<div class="item"><span class="when">${m.name} · ${m.status}</span>
+      <span class="what">${m.detail} ${m.url?`<a href="${m.url}" target="_blank" rel="noopener">↗</a>`:""}</span></div>`).join("");
+    const src = (b.sources||[]).map(s=>`<a href="${s.url}" target="_blank" rel="noopener">${s.label} ↗</a>`).join("");
+    return `<article class="card">
+      <div class="band" style="background:${b.color}"></div>
+      <div class="pad">
+        <div class="head"><span class="icon">${b.icon}</span><h3>${title}</h3></div>
+        <div class="hero-stat"><span class="big" style="color:${b.color}">${b.hero_stat}</span><span class="lab">${heroLab}</span></div>
+        <div class="plain">${plain}</div>
+        ${isoTable}
+        <details><summary class="todetail">${UI[LANG].details}</summary>
+          <ul class="facts">${facts}</ul>
+          <div class="mit"><b>${UI[LANG].mitig}</b>${mit}</div>
+        </details>
+      </div>
+      <div class="src">${src}</div>
+    </article>`;
+  }).join("");
+}
+
+function renderGloss() {
+  document.getElementById("gloss").innerHTML = `<details class="gloss" open><summary>${UI[LANG].gloss_h}</summary>` +
+    DATA.glossary.map(g=>`<div class="gterm"><b>${g.term}</b> — ${LANG==="zh"?(g.plain_zh||g.plain):g.plain}</div>`).join("") +
+    `</details>`;
+}
+
+function applyStaticText() {
+  document.querySelectorAll("[data-t]").forEach(el => { const k = el.getAttribute("data-t"); if (UI[LANG][k]) el.textContent = UI[LANG][k]; });
+  document.documentElement.lang = LANG==="zh" ? "zh-Hant" : "en";
+  document.querySelector('[data-i18n-nav="blind"]').textContent = LANG==="zh" ? "偵測盲區" : "Blind Spots";
+}
+function renderAll() { applyStaticText(); renderSpec(); renderCards(); renderGloss(); }
+
+document.querySelectorAll(".langtog button").forEach(btn => btn.addEventListener("click", () => {
+  LANG = btn.dataset.lang;
+  document.querySelectorAll(".langtog button").forEach(b=>b.classList.toggle("on", b===btn));
+  if (DATA) renderAll();
+}));
+
+fetch("data/blindspots.json").then(r=>r.json()).then(d => { DATA = d; renderAll(); })
+  .catch(() => { document.getElementById("cards").innerHTML =
+    "<p style='color:#ff6b5e'>Run <code>incoming blindspots</code> to generate <code>web/data/blindspots.json</code>.</p>"; });
+</script>
+</body>
+</html>

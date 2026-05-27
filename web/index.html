@@ -28,16 +28,39 @@
   #tip { position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%);
     color: #8294a8; font-size: 12px; }
   .note { color: #6f8197; font-size: 11px; margin-top: 8px; max-width: 340px; pointer-events: none; }
+  #nav { position: fixed; top: 0; left: 0; right: 0; z-index: 20; display: flex; align-items: center;
+    gap: 14px; padding: 10px 16px; background: rgba(7,10,18,.82); backdrop-filter: blur(8px);
+    border-bottom: 1px solid #1c2740; }
+  #nav .brand { font-weight: 700; }
+  #nav a { color: #93a4bd; text-decoration: none; padding: 5px 10px; border-radius: 8px; font-size: 13px; }
+  #nav a.active, #nav a:hover { color: #fff; background: #152034; }
+  #hud { top: 58px; }
+  #mission { margin-top: 10px; font-size: 12px; color: #aebccf; max-width: 340px;
+    border-left: 2px solid #c0392b; padding-left: 10px; }
+  #detail { position: fixed; right: 16px; bottom: 76px; width: 290px; background: rgba(15,22,38,.94);
+    border: 1px solid #2a3a52; border-radius: 12px; padding: 14px 16px; display: none; }
+  #detail h3 { margin: 0 0 6px; font-size: 16px; }
+  #detail .k { color: #93a4bd; font-size: 12px; }
+  #detail .close { float: right; cursor: pointer; color: #93a4bd; }
 </style>
 </head>
 <body>
 <div id="app"></div>
+<nav id="nav">
+  <span class="brand">🛰 incoming-observatory</span>
+  <a href="index.html" class="active">Live Map</a>
+  <a href="blindspots.html">偵測盲區 · Blind Spots</a>
+</nav>
+<div id="detail"><span class="close" onclick="document.getElementById('detail').style.display='none'">✕</span>
+  <h3 id="d-title"></h3><div id="d-body"></div></div>
 <div id="hud">
   <h1>incoming-observatory</h1>
   <div class="sub">How much warning did we actually have?</div>
   <div id="stat">Loading the ledger…</div>
   <div class="note">Honest scope: this shows the objects we <i>did</i> catch and how late.
     It does not claim to see the invisible. Interstellar objects are natural-object science.</div>
+  <div id="mission">Human civilization is young — let's not be ended by a rock we never saw,
+    before we ever become multi-planetary. 別在成為跨星球文明前，被一顆沒看見的石頭結束一切。</div>
 </div>
 <div id="legend">
   <div class="row"><span class="sw" style="background:#ff3b30"></span>&lt; 4 h warning</div>
@@ -125,9 +148,31 @@ function buildEarthImpactors(records) {
       new THREE.MeshBasicMaterial({ color: warningColor(r.warning_hours) })
     );
     head.position.copy(far);
+    head.userData = {
+      title: r.designation,
+      body: `<div class="k">warning time</div><b>${r.warning_hours} hours</b> before impact`
+        + `<div class="k" style="margin-top:8px">where</div>${r.location || "—"}`
+        + `<div class="k" style="margin-top:8px">blind spot</div>${r.blindspot}`,
+    };
+    pickable.push(head);
     groups.earth.add(head);
   });
 }
+const pickable = [];
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+renderer.domElement.addEventListener("click", (e) => {
+  mouse.x = (e.clientX / innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const hit = raycaster.intersectObjects(pickable.filter((o) => o.visible && o.parent.visible))[0];
+  const panel = document.getElementById("detail");
+  if (hit && hit.object.userData.title) {
+    document.getElementById("d-title").textContent = hit.object.userData.title;
+    document.getElementById("d-body").innerHTML = hit.object.userData.body;
+    panel.style.display = "block";
+  }
+});
 
 // ---- SOLAR SYSTEM VIEW: sun, planet orbits, a comet plunge + interstellar hyperbola ----
 function buildSolar() {

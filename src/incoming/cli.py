@@ -5,6 +5,7 @@ import argparse
 from pathlib import Path
 
 from incoming import alert as alert_mod
+from incoming import blindspots as blindspots_mod
 from incoming import recompute as recompute_mod
 from incoming import screen as screen_mod
 from incoming import triage as triage_mod
@@ -44,6 +45,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     p_sc.add_argument("--live", action="store_true", help="fetch the live Scout/NEOCP feed")
 
+    sub.add_parser(
+        "blindspots", help="assemble the detection-blind-spot dashboard data (web/blindspots.html)"
+    )
+
     args = ap.parse_args(argv)
 
     if args.cmd == "ledger":
@@ -63,6 +68,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.cmd == "screen":
         screen_mod.run(live=args.live)
+        return 0
+    if args.cmd == "blindspots":
+        blindspots_mod.build()
         return 0
     return 1
 
