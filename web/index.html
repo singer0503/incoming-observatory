@@ -154,25 +154,33 @@ scene.add(sunLight);
   scene.add(build(7000, 2950, true));   // the Milky Way band
 })();
 
+// soft round particle sprite so the belts look like dust, not blocky squares
+const DOT = (() => {
+  const c = document.createElement("canvas"); c.width = c.height = 64;
+  const x = c.getContext("2d"), g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(0.45, "rgba(255,255,255,0.45)"); g.addColorStop(1, "rgba(255,255,255,0)");
+  x.fillStyle = g; x.fillRect(0, 0, 64, 64);
+  return new THREE.CanvasTexture(c);
+})();
 // asteroid main belt + a faint Kuiper belt — keep the map rich even with all data layers off
 const beltSpin = new THREE.Group(); scene.add(beltSpin);
 const kuiperSpin = new THREE.Group(); scene.add(kuiperSpin);
 (() => {
-  const ring = (group, n, r0, r1, yspread, size, rgb) => {
+  const ring = (group, n, r0, r1, yspread, size, opacity, rgb) => {
     const p = new Float32Array(n*3), c = new Float32Array(n*3);
     for (let i = 0; i < n; i++) {
       const a = Math.random()*Math.PI*2, r = (r0 + Math.random()*(r1-r0))*SCALE;
-      p[i*3] = Math.cos(a)*r; p[i*3+1] = (Math.random()-0.5)*yspread*SCALE*0.1; p[i*3+2] = Math.sin(a)*r;
-      const t = 0.6 + Math.random()*0.4; c[i*3] = rgb[0]*t; c[i*3+1] = rgb[1]*t; c[i*3+2] = rgb[2]*t;
+      p[i*3] = Math.cos(a)*r; p[i*3+1] = (Math.random()-0.5)*yspread; p[i*3+2] = Math.sin(a)*r;
+      const t = 0.55 + Math.random()*0.45; c[i*3] = rgb[0]*t; c[i*3+1] = rgb[1]*t; c[i*3+2] = rgb[2]*t;
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(p, 3));
     g.setAttribute("color", new THREE.BufferAttribute(c, 3));
-    group.add(new THREE.Points(g, new THREE.PointsMaterial({ size, vertexColors: true,
-      sizeAttenuation: true, transparent: true, opacity: 0.85 })));
+    group.add(new THREE.Points(g, new THREE.PointsMaterial({ size, map: DOT, vertexColors: true,
+      sizeAttenuation: true, transparent: true, opacity, depthWrite: false, alphaTest: 0.02 })));
   };
-  ring(beltSpin, 4500, 2.1, 3.3, 1.2, 0.55, [0.78, 0.56, 0.4]);   // main belt (Mars–Jupiter)
-  ring(kuiperSpin, 3200, 30, 48, 4.0, 0.7, [0.55, 0.6, 0.78]);    // Kuiper belt (faint, far)
+  ring(beltSpin, 5000, 2.1, 3.3, 1.3, 0.22, 0.8, [0.82, 0.6, 0.42]);   // main belt (Mars–Jupiter)
+  ring(kuiperSpin, 3000, 30, 48, 4.0, 0.5, 0.45, [0.6, 0.66, 0.82]);   // Kuiper belt (faint, far)
 })();
 
 function hash01(s) { let h = 2166136261; s = String(s);
