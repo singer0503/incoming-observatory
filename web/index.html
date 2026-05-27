@@ -117,8 +117,8 @@ composer.addPass(new RenderPass(scene, camera));
 const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.34, 0.32, 0.86);
 composer.addPass(bloom);
 
-scene.add(new THREE.AmbientLight(0x33405c, 0.5));          // fill so night sides read, terminator stays
-const sunLight = new THREE.PointLight(0xfff2d6, 2.6, 0, 1.3);
+scene.add(new THREE.AmbientLight(0x5b6a8c, 0.75));        // brighter fill so every planet reads
+const sunLight = new THREE.PointLight(0xfff4e0, 2.4, 0, 0.0);  // decay 0 = no falloff → all planets evenly lit
 scene.add(sunLight);
 
 // procedural deep-space backdrop: a star sphere + a tilted Milky Way band (no external image)
