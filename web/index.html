@@ -3,45 +3,50 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>incoming-observatory — how blind are we?</title>
+<title>incoming-observatory — live solar-system situational map</title>
 <style>
-  :root { color-scheme: dark; }
+  :root { color-scheme: dark; --line:#1c2740; --muted:#93a4bd; }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; background: #05070d; color: #e8eef6;
-    font: 14px/1.5 -apple-system, "Segoe UI", system-ui, sans-serif; overflow: hidden; }
-  #app { position: fixed; inset: 0; }
-  #hud { position: fixed; top: 16px; left: 16px; max-width: 360px; pointer-events: none; }
-  #hud h1 { font-size: 18px; margin: 0 0 2px; }
-  #hud .sub { color: #9fb0c3; font-size: 12px; margin-bottom: 10px; }
-  #stat { background: rgba(192,57,43,.14); border: 1px solid rgba(192,57,43,.5);
-    border-radius: 8px; padding: 10px 12px; font-size: 13px; }
-  #stat b { color: #ff6b5e; font-size: 16px; }
-  #views { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
-    display: flex; gap: 8px; pointer-events: auto; }
-  #views button { background: #101826; color: #cdd9e8; border: 1px solid #2a3a52;
-    padding: 8px 16px; border-radius: 999px; cursor: pointer; font-size: 13px; }
-  #views button.active { background: #c0392b; border-color: #ff6b5e; color: #fff; }
-  #legend { position: fixed; right: 16px; top: 16px; background: rgba(16,24,38,.7);
-    border: 1px solid #2a3a52; border-radius: 8px; padding: 10px 12px; font-size: 12px; }
-  #legend .row { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
-  #legend .sw { width: 12px; height: 12px; border-radius: 3px; }
-  #tip { position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%);
-    color: #8294a8; font-size: 12px; }
-  .note { color: #6f8197; font-size: 11px; margin-top: 8px; max-width: 340px; pointer-events: none; }
-  #nav { position: fixed; top: 0; left: 0; right: 0; z-index: 20; display: flex; align-items: center;
-    gap: 14px; padding: 10px 16px; background: rgba(7,10,18,.82); backdrop-filter: blur(8px);
-    border-bottom: 1px solid #1c2740; }
-  #nav .brand { font-weight: 700; }
-  #nav a { color: #93a4bd; text-decoration: none; padding: 5px 10px; border-radius: 8px; font-size: 13px; }
-  #nav a.active, #nav a:hover { color: #fff; background: #152034; }
-  #hud { top: 58px; }
-  #mission { margin-top: 10px; font-size: 12px; color: #aebccf; max-width: 340px;
-    border-left: 2px solid #c0392b; padding-left: 10px; }
-  #detail { position: fixed; right: 16px; bottom: 76px; width: 290px; background: rgba(15,22,38,.94);
-    border: 1px solid #2a3a52; border-radius: 12px; padding: 14px 16px; display: none; }
-  #detail h3 { margin: 0 0 6px; font-size: 16px; }
-  #detail .k { color: #93a4bd; font-size: 12px; }
-  #detail .close { float: right; cursor: pointer; color: #93a4bd; }
+  html, body { margin:0; height:100%; background:#05070d; color:#e8eef6; overflow:hidden;
+    font:13px/1.5 -apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",system-ui,sans-serif; }
+  #app { position:fixed; inset:0; }
+  #nav { position:fixed; top:0; left:0; right:0; z-index:30; display:flex; align-items:center; gap:14px;
+    padding:9px 16px; background:rgba(7,10,18,.82); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
+  #nav .brand { font-weight:700; }
+  #nav a { color:var(--muted); text-decoration:none; padding:5px 10px; border-radius:8px; font-size:13px; }
+  #nav a.active, #nav a:hover { color:#fff; background:#152034; }
+  #nav .spacer { flex:1; }
+  #nav .mission { color:#8ea0b8; font-size:11.5px; max-width:430px; text-align:right; }
+  .panel { position:fixed; z-index:20; background:rgba(13,19,32,.92); border:1px solid var(--line);
+    border-radius:14px; padding:12px 14px; }
+  #layers { top:58px; left:14px; width:248px; }
+  #layers h2 { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:2px 0 10px; }
+  .layer { display:flex; align-items:center; gap:10px; padding:8px 8px; border-radius:10px; cursor:pointer; }
+  .layer:hover { background:#152034; }
+  .layer .dot { width:11px; height:11px; border-radius:50%; flex:none; box-shadow:0 0 8px currentColor; }
+  .layer .nm { flex:1; }
+  .layer .nm small { display:block; color:var(--muted); font-size:11px; }
+  .layer .ct { color:var(--muted); font-variant-numeric:tabular-nums; }
+  .layer.off { opacity:.4; }
+  .layer.off .dot { box-shadow:none; background:#33415c !important; }
+  #detail { top:58px; right:14px; width:286px; display:none; }
+  #detail .close { float:right; cursor:pointer; color:var(--muted); }
+  #detail h3 { margin:0 0 4px; font-size:16px; }
+  #detail .cat { display:inline-block; padding:1px 9px; border-radius:999px; font-size:11px; margin-bottom:8px; }
+  #detail .k { color:var(--muted); font-size:11px; margin-top:8px; }
+  #detail .why { margin-top:10px; padding-top:10px; border-top:1px solid var(--line); color:#cfdcef; font-size:12.5px; }
+  #time { bottom:16px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:14px; }
+  #time button { background:#152034; border:1px solid var(--line); color:#cdd9e8; width:34px; height:34px;
+    border-radius:50%; cursor:pointer; font-size:14px; }
+  #time input[type=range] { width:170px; accent-color:#c0392b; }
+  #time .clock { color:var(--muted); font-variant-numeric:tabular-nums; min-width:96px; }
+  #views { bottom:64px; left:50%; transform:translateX(-50%); display:flex; gap:8px; }
+  #views button { background:rgba(13,19,32,.9); border:1px solid var(--line); color:#cdd9e8;
+    padding:6px 14px; border-radius:999px; cursor:pointer; }
+  #views button.on { background:#c0392b; border-color:#ff6b5e; color:#fff; }
+  #scope { position:fixed; bottom:14px; right:14px; z-index:20; color:#6f8197; font-size:10.5px;
+    max-width:300px; text-align:right; }
+  #tip { position:fixed; top:60px; left:50%; transform:translateX(-50%); color:#7d8ba0; font-size:11px; z-index:10; }
 </style>
 </head>
 <body>
@@ -50,30 +55,24 @@
   <span class="brand">🛰 incoming-observatory</span>
   <a href="index.html" class="active">Live Map</a>
   <a href="blindspots.html">偵測盲區 · Blind Spots</a>
+  <span class="spacer"></span>
+  <span class="mission">Human civilization is young — let's see it coming. 別在成為跨星球文明前，被沒看見的天體終結。</span>
 </nav>
-<div id="detail"><span class="close" onclick="document.getElementById('detail').style.display='none'">✕</span>
-  <h3 id="d-title"></h3><div id="d-body"></div></div>
-<div id="hud">
-  <h1>incoming-observatory</h1>
-  <div class="sub">How much warning did we actually have?</div>
-  <div id="stat">Loading the ledger…</div>
-  <div class="note">Honest scope: this shows the objects we <i>did</i> catch and how late.
-    It does not claim to see the invisible. Interstellar objects are natural-object science.</div>
-  <div id="mission">Human civilization is young — let's not be ended by a rock we never saw,
-    before we ever become multi-planetary. 別在成為跨星球文明前，被一顆沒看見的石頭結束一切。</div>
+<div id="layers" class="panel"><h2>Layers · 圖層</h2><div id="layerList"></div></div>
+<div id="detail" class="panel"><span class="close" onclick="this.parentNode.style.display='none'">✕</span>
+  <h3 id="d-title"></h3><div id="d-cat"></div><div id="d-body"></div><div class="why" id="d-why"></div></div>
+<div id="tip">drag to orbit · scroll to zoom · click any object</div>
+<div id="views" class="panel" style="padding:0;border:none;background:none">
+  <button data-view="sun" class="on">☀️ Sun view</button>
+  <button data-view="earth">🌍 Earth view</button>
 </div>
-<div id="legend">
-  <div class="row"><span class="sw" style="background:#ff3b30"></span>&lt; 4 h warning</div>
-  <div class="row"><span class="sw" style="background:#ff9500"></span>4–12 h</div>
-  <div class="row"><span class="sw" style="background:#ffcc00"></span>&gt; 12 h</div>
-  <div class="row"><span class="sw" style="background:#7d5fff"></span>interstellar / hyperbolic</div>
+<div id="time" class="panel">
+  <button id="play">⏸</button>
+  <input id="speed" type="range" min="0" max="5" step="0.1" value="1" />
+  <span class="clock" id="clock">T+ 0 d</span>
 </div>
-<div id="views">
-  <button data-view="earth" class="active">🌍 Earth</button>
-  <button data-view="solar">☀️ Solar System</button>
-  <button data-view="galaxy">🌌 Galaxy</button>
-</div>
-<div id="tip">drag to orbit · scroll to zoom</div>
+<div id="scope">Schematic situational map — object attributes (size, scores, speed, eccentricity)
+  are real public data; on-screen positions are illustrative, not computed ephemerides.</div>
 
 <script type="importmap">
 { "imports": {
@@ -92,170 +91,246 @@ renderer.setSize(innerWidth, innerHeight);
 app.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.01, 5000);
+const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.05, 8000);
+camera.position.set(0, 14, 20);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
-scene.add(new THREE.AmbientLight(0x9fb0c3, 0.5));
-const sunLight = new THREE.PointLight(0xffffff, 2.2, 0, 0.4);
+scene.add(new THREE.AmbientLight(0xa0b0c8, 0.55));
+const sunLight = new THREE.PointLight(0xffffff, 2.4, 0, 0.5);
 scene.add(sunLight);
 
-// Starfield backdrop (the galaxy we live in).
-function starfield(n, spread) {
+// starfield
+(() => {
+  const n = 5000, p = new Float32Array(n * 3);
+  for (let i = 0; i < n * 3; i++) p[i] = (Math.random() - 0.5) * 2400;
   const g = new THREE.BufferGeometry();
-  const p = new Float32Array(n * 3);
-  for (let i = 0; i < n * 3; i++) p[i] = (Math.random() - 0.5) * spread;
   g.setAttribute("position", new THREE.BufferAttribute(p, 3));
-  return new THREE.Points(g, new THREE.PointsMaterial({ color: 0xbfd0e6, size: 0.6, sizeAttenuation: true }));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xbfd0e6, size: 0.7 })));
+})();
+
+// deterministic pseudo-random angle from a string (stable object placement)
+function hash01(s) { let h = 2166136261; s = String(s);
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return ((h >>> 0) % 100000) / 100000; }
+
+// canvas text label as a sprite
+function makeLabel(text, color = "#dfe8f5") {
+  const c = document.createElement("canvas"), ctx = c.getContext("2d");
+  ctx.font = "26px -apple-system, system-ui, sans-serif";
+  c.width = ctx.measureText(text).width + 16; c.height = 36;
+  ctx.font = "26px -apple-system, system-ui, sans-serif"; ctx.fillStyle = color;
+  ctx.fillText(text, 8, 27);
+  const tex = new THREE.CanvasTexture(c); tex.minFilter = THREE.LinearFilter;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+  sp.scale.set(c.width / 36, 1, 1); return sp;
 }
-scene.add(starfield(6000, 2000));
 
-const groups = { earth: new THREE.Group(), solar: new THREE.Group(), galaxy: new THREE.Group() };
-Object.values(groups).forEach((g) => scene.add(g));
+// ---- the Sun + schematic planets ----
+const R_EARTH = 7;
+const sun = new THREE.Mesh(new THREE.SphereGeometry(1.4, 32, 32), new THREE.MeshBasicMaterial({ color: 0xffd23f }));
+scene.add(sun);
+const sunLabel = makeLabel("Sun ☀️", "#ffd23f"); sunLabel.position.set(0, 2, 0); scene.add(sunLabel);
+const planets = [{ r: 3.2, c: 0x9c8b7a, n: "Mercury" }, { r: 4.8, c: 0xd8b27a, n: "Venus" },
+  { r: R_EARTH, c: 0x4aa3ff, n: "Earth" }, { r: 9.4, c: 0xc1654a, n: "Mars" }];
+planets.forEach((pl) => {
+  const pts = [];
+  for (let a = 0; a <= 96; a++) pts.push(new THREE.Vector3(Math.cos(a / 96 * 2 * Math.PI) * pl.r, 0, Math.sin(a / 96 * 2 * Math.PI) * pl.r));
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),
+    new THREE.LineBasicMaterial({ color: pl.n === "Earth" ? 0x2a5a8a : 0x29364d })));
+});
 
-function warningColor(h) {
-  if (h < 4) return 0xff3b30;
-  if (h < 12) return 0xff9500;
-  return 0xffcc00;
-}
+// Earth group (orbits the Sun; carries near-Earth layers)
+const earthGroup = new THREE.Group(); scene.add(earthGroup);
+const earth = new THREE.Mesh(new THREE.SphereGeometry(0.32, 24, 24),
+  new THREE.MeshStandardMaterial({ color: 0x2e72c0, emissive: 0x0a2036 }));
+earthGroup.add(earth);
+const earthLabel = makeLabel("Earth 🌍", "#7db2ff"); earthLabel.position.set(0, 0.7, 0); earthGroup.add(earthLabel);
 
-// ---- EARTH VIEW: the globe + every pre-impact detection as an incoming streak ----
-const earth = new THREE.Mesh(
-  new THREE.SphereGeometry(1, 48, 48),
-  new THREE.MeshStandardMaterial({ color: 0x1b4f72, emissive: 0x0a1a2a, roughness: 0.9 })
-);
-groups.earth.add(earth);
-// sunward blind-spot cone (objects from the Sun's direction are invisible from the ground)
-const blind = new THREE.Mesh(
-  new THREE.ConeGeometry(1.4, 4, 32, 1, true),
-  new THREE.MeshBasicMaterial({ color: 0xffcc00, transparent: true, opacity: 0.07, side: THREE.DoubleSide })
-);
-blind.position.set(0, 0, 3.2);
-blind.rotation.x = Math.PI / 2;
-groups.earth.add(blind);
-
-function buildEarthImpactors(records) {
-  const det = records.filter((r) => r.detected_before_impact);
-  det.forEach((r, i) => {
-    const a = (i / det.length) * Math.PI * 2;
-    const dir = new THREE.Vector3(Math.cos(a), Math.sin(a) * 0.6, Math.sin(a)).normalize();
-    const far = dir.clone().multiplyScalar(3.2);
-    const geom = new THREE.BufferGeometry().setFromPoints([far, dir.clone().multiplyScalar(1.02)]);
-    const line = new THREE.Line(geom, new THREE.LineBasicMaterial({ color: warningColor(r.warning_hours) }));
-    groups.earth.add(line);
-    const head = new THREE.Mesh(
-      new THREE.SphereGeometry(0.035 + r.warning_hours * 0.002, 12, 12),
-      new THREE.MeshBasicMaterial({ color: warningColor(r.warning_hours) })
-    );
-    head.position.copy(far);
-    head.userData = {
-      title: r.designation,
-      body: `<div class="k">warning time</div><b>${r.warning_hours} hours</b> before impact`
-        + `<div class="k" style="margin-top:8px">where</div>${r.location || "—"}`
-        + `<div class="k" style="margin-top:8px">blind spot</div>${r.blindspot}`,
-    };
-    pickable.push(head);
-    groups.earth.add(head);
-  });
-}
+// ---- layers ----
 const pickable = [];
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-renderer.domElement.addEventListener("click", (e) => {
-  mouse.x = (e.clientX / innerWidth) * 2 - 1;
-  mouse.y = -(e.clientY / innerHeight) * 2 + 1;
-  raycaster.setFromCamera(mouse, camera);
-  const hit = raycaster.intersectObjects(pickable.filter((o) => o.visible && o.parent.visible))[0];
-  const panel = document.getElementById("detail");
-  if (hit && hit.object.userData.title) {
-    document.getElementById("d-title").textContent = hit.object.userData.title;
-    document.getElementById("d-body").innerHTML = hit.object.userData.body;
-    panel.style.display = "block";
-  }
-});
-
-// ---- SOLAR SYSTEM VIEW: sun, planet orbits, a comet plunge + interstellar hyperbola ----
-function buildSolar() {
-  const sun = new THREE.Mesh(new THREE.SphereGeometry(1.1, 32, 32),
-    new THREE.MeshBasicMaterial({ color: 0xffd23f }));
-  groups.solar.add(sun);
-  const radii = [3, 4.3, 5.6, 7]; // schematic inner planets incl. Earth
-  radii.forEach((rad, idx) => {
-    const pts = [];
-    for (let a = 0; a <= 64; a++) pts.push(new THREE.Vector3(Math.cos(a / 64 * 7) * rad, 0, Math.sin(a / 64 * 7) * rad));
-    groups.solar.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),
-      new THREE.LineBasicMaterial({ color: idx === 2 ? 0x4aa3ff : 0x33415c })));
-  });
-  const e = new THREE.Mesh(new THREE.SphereGeometry(0.22, 24, 24), new THREE.MeshStandardMaterial({ color: 0x4aa3ff }));
-  e.position.set(5.6, 0, 0); groups.solar.add(e);
-  // interstellar hyperbolic path arriving from outside the system (e > 1)
-  const iso = [];
-  for (let t = -10; t <= 10; t += 0.4) iso.push(new THREE.Vector3(t, t * 0.15, 1.6 + 0.06 * t * t));
-  groups.solar.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(iso),
-    new THREE.LineBasicMaterial({ color: 0x7d5fff })));
-  const tag = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 16), new THREE.MeshBasicMaterial({ color: 0x7d5fff }));
-  tag.position.copy(iso[8]); groups.solar.add(tag);
-}
-
-// ---- GALAXY VIEW: where interstellar visitors come from ----
-function buildGalaxy() {
-  groups.galaxy.add(starfield(9000, 60));
-  const arrowPts = [new THREE.Vector3(-25, 6, -10), new THREE.Vector3(0, 0, 0)];
-  groups.galaxy.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(arrowPts),
-    new THREE.LineBasicMaterial({ color: 0x7d5fff })));
-  const sun = new THREE.Mesh(new THREE.SphereGeometry(0.8, 24, 24), new THREE.MeshBasicMaterial({ color: 0xffd23f }));
-  groups.galaxy.add(sun);
-}
-buildSolar();
-buildGalaxy();
-
-const camPos = {
-  earth: [0, 1.5, 5.5],
-  solar: [0, 9, 13],
-  galaxy: [0, 8, 26],
+const layers = {
+  close:        { color: "#ff9500", icon: "☄️", label: "Close approaches", sub: "撞擊前才發現的歷史紀錄", objs: [], on: true },
+  risk:         { color: "#ff3b30", icon: "⚠️", label: "Impact risk (Sentry)", sub: "NASA 風險清單", objs: [], on: true },
+  neocp:        { color: "#00d0ff", icon: "🔭", label: "NEOCP (unconfirmed)", sub: "剛發現、待確認", objs: [], on: true },
+  interstellar: { color: "#7d5fff", icon: "🌌", label: "Interstellar", sub: "來自太陽系外", objs: [], on: true },
+  blindspot:    { color: "#ffcc00", icon: "☀️", label: "Blind spots", sub: "我們看不見的方向", objs: [], on: true },
 };
-let view = "earth";
-function setView(v) {
-  view = v;
-  for (const k in groups) groups[k].visible = k === v;
-  const [x, y, z] = camPos[v];
-  camera.position.set(x, y, z);
-  controls.target.set(0, 0, 0);
-  document.querySelectorAll("#views button").forEach((b) =>
-    b.classList.toggle("active", b.dataset.view === v));
+function addObj(layer, obj, pick) { obj.visible = layers[layer].on; layers[layer].objs.push(obj);
+  if (pick) { obj.userData._layer = layer; pickable.push(obj); } }
+
+function levelColor(l) { return l === "SEVERE" ? "#ff1e1e" : l === "ELEVATED" ? "#ff8a00" : "#7a4a3a"; }
+function catColor(c) {
+  return ({ "IMPACT-WATCH": "#ff1e1e", "PHA-CANDIDATE": "#ff6a00", "UNUSUAL/COMETARY": "#48c9b0",
+    "NEO-CANDIDATE": "#00d0ff", "LIKELY-ARTIFACT": "#566073", "LOW-PRIORITY": "#7d8ba0" })[c] || "#00d0ff"; }
+
+function buildClose(records) {
+  records.filter(r => r.detected_before_impact).forEach((r, i) => {
+    const a = hash01(r.designation) * Math.PI * 2;
+    const dir = new THREE.Vector3(Math.cos(a), (hash01(r.designation + "y") - 0.5) * 0.8, Math.sin(a)).normalize();
+    const far = dir.clone().multiplyScalar(2.6);
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([far, dir.clone().multiplyScalar(0.35)]),
+      new THREE.LineBasicMaterial({ color: r.warning_hours < 4 ? 0xff3b30 : r.warning_hours < 12 ? 0xff9500 : 0xffcc00 }));
+    earthGroup.add(line); addObj("close", line, false);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 10),
+      new THREE.MeshBasicMaterial({ color: 0xff9500 }));
+    head.position.copy(far);
+    head.userData = { title: r.designation, cat: "Pre-impact detection", catColor: "#ff9500",
+      body: `<div class="k">warning time</div><b>${r.warning_hours} h</b> before impact`
+        + `<div class="k">where</div>${r.location || "—"}<div class="k">blind spot</div>${r.blindspot}`,
+      why: `We caught it only ${r.warning_hours} hours before it hit — a measured data point in how little warning we get.` };
+    earthGroup.add(head); addObj("close", head, true);
+  });
 }
-document.querySelectorAll("#views button").forEach((b) =>
-  b.addEventListener("click", () => setView(b.dataset.view)));
 
-// Load the published ledger (written by `incoming ledger`).
-fetch("data/ledger.json").then((r) => r.json()).then((records) => {
-  buildEarthImpactors(records);
-  const det = records.filter((r) => r.detected_before_impact);
-  const longest = Math.max(...det.map((r) => r.warning_hours));
-  let html =
-    `Every asteroid <b>ever</b> caught before it hit Earth: <b>${det.length}</b>.<br>` +
-    `Longest warning on record: <b>${longest} hours</b> — not days.`;
-  // If the independent recompute has run, show how many we verified from raw MPC data.
-  fetch("data/recomputed.json").then((r) => r.json()).then((rc) => {
-    const v = rc.filter((x) => x.warning_recomputed_h !== null).length;
-    html += `<br><span style="color:#9fb0c3">${v}/${rc.length} independently recomputed from raw MPC observations.</span>`;
-    document.getElementById("stat").innerHTML = html;
-  }).catch(() => { document.getElementById("stat").innerHTML = html; });
-}).catch(() => {
-  document.getElementById("stat").innerHTML =
-    "Run <code>incoming ledger</code> first to generate <code>web/data/ledger.json</code>.";
+function buildRisk(rows) {
+  const top = rows.slice(0, 120);
+  top.forEach((o) => {
+    const a = hash01(o.designation) * Math.PI * 2;
+    const rad = 4 + hash01(o.designation + "r") * 9;
+    const y = (o.palermo_cum != null ? Math.max(-3, o.palermo_cum) : -3) * 0.5;
+    const size = Math.min(0.5, 0.06 + (o.diameter_km || 0.05) * 0.25);
+    const m = new THREE.Mesh(new THREE.SphereGeometry(size, 12, 12),
+      new THREE.MeshBasicMaterial({ color: levelColor(o.level) }));
+    m.position.set(Math.cos(a) * rad, y, Math.sin(a) * rad);
+    m.userData = { title: o.fullname || o.designation, cat: o.level, catColor: levelColor(o.level),
+      body: `<div class="k">Palermo scale (cum.)</div><b>${o.palermo_cum ?? "—"}</b>`
+        + `<div class="k">impact probability</div>${o.impact_prob != null ? o.impact_prob.toExponential(2) : "—"}`
+        + `<div class="k">Torino</div>${o.torino_max ?? 0}<div class="k">est. diameter</div>${o.diameter_km != null ? (o.diameter_km*1000).toFixed(0)+" m" : "—"}`
+        + `<div class="k">possible impact window</div>${o.impact_year_range || "—"}`,
+      why: o.level === "SEVERE" ? "Merits serious attention on the Palermo scale." :
+           o.level === "ELEVATED" ? "Above background risk — worth monitoring." :
+           "Routine background risk (Palermo < -2): catalogued, not alarming." };
+    scene.add(m); addObj("risk", m, true);
+  });
+}
+
+function buildNeocp(rows) {
+  rows.forEach((o) => {
+    const a = hash01(o.object) * Math.PI * 2, rad = 1.0 + hash01(o.object + "r") * 1.4;
+    const m = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 10),
+      new THREE.MeshBasicMaterial({ color: catColor(o.category) }));
+    m.position.set(Math.cos(a) * rad, (hash01(o.object + "y") - 0.5) * 1.2, Math.sin(a) * rad);
+    m.userData = { title: o.object, cat: o.category, catColor: catColor(o.category),
+      body: `<div class="k">NEO score</div>${o.neoScore ?? "—"}<div class="k">PHA score</div>${o.phaScore ?? "—"}`
+        + `<div class="k">MOID</div>${o.moid_au ?? "—"} au<div class="k">est. diameter</div>${o.diameter_est_km != null ? (o.diameter_est_km*1000).toFixed(0)+" m" : "—"}`
+        + `<div class="k">obs. arc</div>${o.arc_days ?? "—"} d<div class="k">flags</div>${o.flags || "—"}`,
+      why: "A fresh, unconfirmed discovery from the NEOCP firehose. Short arc → uncertain orbit. This is triage, not confirmation." };
+    earthGroup.add(m); addObj("neocp", m, true);
+  });
+}
+
+function buildInterstellar(objs) {
+  objs.forEach((o, idx) => {
+    const nm = o.fullname || o.query || "interstellar";
+    const baseA = (idx / Math.max(1, objs.length)) * Math.PI * 2 + 0.6;
+    const curve = [];
+    for (let t = -1; t <= 1; t += 0.05) {
+      const d = 22 * Math.abs(t);
+      const bend = 2.5 / (o.e || 2);              // higher e -> straighter path
+      const ang = baseA + t * bend;
+      curve.push(new THREE.Vector3(Math.cos(ang) * (1.5 + d), t * 2.0, Math.sin(ang) * (1.5 + d)));
+    }
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve),
+      new THREE.LineBasicMaterial({ color: 0x7d5fff }));
+    scene.add(line); addObj("interstellar", line, false);
+    const tag = new THREE.Mesh(new THREE.SphereGeometry(0.16, 14, 14), new THREE.MeshBasicMaterial({ color: 0x7d5fff }));
+    tag.position.copy(curve[Math.floor(curve.length * 0.62)]);
+    tag.userData = { title: nm, cat: "Interstellar", catColor: "#7d5fff",
+      body: `<div class="k">eccentricity (e)</div><b>${o.e}</b> (e &gt; 1 = unbound)`
+        + `<div class="k">v∞</div>${o.v_inf_km_s ?? "—"} km/s`,
+      why: "On a hyperbolic orbit (e > 1): not bound to the Sun, so it came from interstellar space — and we found it with little lead time." };
+    scene.add(tag); addObj("interstellar", tag, true);
+    const lab = makeLabel(nm.split("(")[0].trim(), "#b9a6ff");
+    lab.position.copy(tag.position).add(new THREE.Vector3(0, 0.8, 0)); scene.add(lab); addObj("interstellar", lab, false);
+  });
+}
+
+// blind spots: sunward cone (tracks Earth->Sun), outer comet shell, interstellar inflow arrow
+let sunwardCone = null;
+function buildBlindspots() {
+  sunwardCone = new THREE.Mesh(new THREE.ConeGeometry(1.6, 6, 28, 1, true),
+    new THREE.MeshBasicMaterial({ color: 0xffcc00, transparent: true, opacity: 0.09, side: THREE.DoubleSide }));
+  sunwardCone.userData = { title: "Sunward blind spot", cat: "Blind spot", catColor: "#ffcc00",
+    body: `<div class="k">warning</div><b>~0 h</b> for objects from the Sun's direction`,
+    why: "Ground telescopes can't look near the Sun — the Chelyabinsk impactor came from exactly here. NEO Surveyor / NEOMIR aim to fix it." };
+  scene.add(sunwardCone); addObj("blindspot", sunwardCone, true);
+  const shell = new THREE.Mesh(new THREE.SphereGeometry(17, 24, 16),
+    new THREE.MeshBasicMaterial({ color: 0x48c9b0, transparent: true, opacity: 0.05, side: THREE.BackSide, wireframe: true }));
+  shell.userData = { title: "Long-period comet zone", cat: "Blind spot", catColor: "#48c9b0",
+    body: `<div class="k">warning</div><b>months</b>, not decades`,
+    why: "Long-period comets fall in from the dark outer system and only brighten when close — months of warning at most." };
+  scene.add(shell); addObj("blindspot", shell, true);
+}
+
+// ---- layer panel ----
+function renderLayerPanel() {
+  document.getElementById("layerList").innerHTML = Object.entries(layers).map(([k, L]) =>
+    `<div class="layer ${L.on ? "" : "off"}" data-layer="${k}">
+      <span class="dot" style="color:${L.color};background:${L.color}"></span>
+      <span class="nm">${L.icon} ${L.label}<small>${L.sub}</small></span>
+      <span class="ct">${L.objs.filter(o => o.userData && o.userData.title).length || L.count || ""}</span></div>`).join("");
+  document.querySelectorAll(".layer").forEach(el => el.addEventListener("click", () => {
+    const k = el.dataset.layer; layers[k].on = !layers[k].on;
+    layers[k].objs.forEach(o => o.visible = layers[k].on);
+    el.classList.toggle("off", !layers[k].on);
+  }));
+}
+
+// ---- picking ----
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+renderer.domElement.addEventListener("click", (e) => {
+  mouse.x = (e.clientX / innerWidth) * 2 - 1; mouse.y = -(e.clientY / innerHeight) * 2 + 1;
+  ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObjects(pickable.filter(o => o.visible))[0];
+  const p = document.getElementById("detail");
+  if (!hit) return;
+  const u = hit.object.userData;
+  document.getElementById("d-title").textContent = u.title;
+  const cat = document.getElementById("d-cat");
+  cat.textContent = u.cat || ""; cat.className = "cat";
+  cat.style.background = (u.catColor || "#555") + "33"; cat.style.color = u.catColor || "#ccc";
+  document.getElementById("d-body").innerHTML = u.body || "";
+  document.getElementById("d-why").textContent = u.why || "";
+  p.style.display = "block";
 });
 
-setView("earth");
-addEventListener("resize", () => {
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
+// ---- views + time ----
+let view = "sun", playing = true, speed = 1, simDays = 0;
+document.querySelectorAll("#views button").forEach(b => b.addEventListener("click", () => {
+  view = b.dataset.view;
+  document.querySelectorAll("#views button").forEach(x => x.classList.toggle("on", x === b));
+}));
+document.getElementById("play").addEventListener("click", function () { playing = !playing; this.textContent = playing ? "⏸" : "▶"; });
+document.getElementById("speed").addEventListener("input", e => speed = parseFloat(e.target.value));
+
+// ---- load the five data streams ----
+const J = (f) => fetch(f).then(r => r.json()).catch(() => null);
+Promise.all([J("data/ledger.json"), J("data/alerts.json"), J("data/neocp_screen.json"),
+             J("data/triage.json"), J("data/blindspots.json")]).then(([led, alr, neo, tri, bs]) => {
+  if (led) buildClose(led);
+  if (alr) { buildRisk(alr); layers.risk.count = `${Math.min(120, alr.length)}/${alr.length}`; }
+  if (neo) buildNeocp(neo);
+  if (tri) buildInterstellar(tri.filter(o => o.interstellar_candidate));
+  buildBlindspots();
+  if (bs) { /* blindspots.json drives the dashboard; here we show the zones */ }
+  renderLayerPanel();
 });
+
+addEventListener("resize", () => { camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+
+const clock = document.getElementById("clock");
 (function loop() {
   requestAnimationFrame(loop);
-  if (view === "earth") groups.earth.rotation.y += 0.0015;
-  if (view === "solar") groups.solar.rotation.y += 0.0008;
+  if (playing) simDays += speed * 0.4;
+  const ea = simDays * 0.0172;                       // Earth's angular position (illustrative)
+  earthGroup.position.set(Math.cos(ea) * R_EARTH, 0, Math.sin(ea) * R_EARTH);
+  earth.rotation.y += 0.01;
+  if (sunwardCone) { sunwardCone.position.copy(earthGroup.position).multiplyScalar(0.5); sunwardCone.lookAt(0, 0, 0); sunwardCone.rotateX(Math.PI / 2); }
+  if (view === "earth") { controls.target.lerp(earthGroup.position, 0.08); }
+  else { controls.target.lerp(new THREE.Vector3(0, 0, 0), 0.08); }
+  clock.textContent = "T+ " + Math.round(simDays) + " d";
   controls.update();
   renderer.render(scene, camera);
 })();

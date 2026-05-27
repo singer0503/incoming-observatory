@@ -105,19 +105,25 @@ incoming screen --live
 Each run writes a `provenance.json` recording which data snapshot and code commit produced the
 numbers — the same "result → source" contract idea this project is built to defend.
 
-### Web preview (Earth · Solar System · Galaxy)
+### Live situational map (`index.html`)
 
-`incoming ledger` also publishes `web/data/ledger.json`, which drives a 3D viewer (Three.js):
+A single interactive 3D solar-system map (Three.js) that integrates **all five data streams** into
+toggleable layers — in the spirit of windy.com, but for near-Earth space:
 
 ```bash
+make all                               # regenerate every web/data/*.json
 cd web && python -m http.server 8000   # then open http://localhost:8000
 ```
 
-Three toggleable views, all driven by the real ledger: the **Earth** globe with every pre-impact
-detection drawn as an incoming streak coloured by warning time (click one for details, plus the
-sunward blind-spot cone); the **Solar System** with a schematic interstellar/hyperbolic trajectory;
-and a zoomed-out **Galaxy** view showing where interstellar visitors arrive from. It is a
-presentation layer over real data — it does not render anything we haven't measured.
+- **Layers you can switch on/off**: ☄️ close approaches · ⚠️ impact risk (Sentry) · 🔭 NEOCP
+  (unconfirmed) · 🌌 interstellar · ☀️ blind spots.
+- **It moves**: Earth orbits the Sun with a play/pause + speed control and an elapsed-time clock;
+  Sun-view and Earth-view camera presets.
+- **Click anything** for a detail panel — real attributes (Palermo scale, impact probability,
+  eccentricity, v∞, NEO/PHA scores) plus a plain-language "why it matters."
+
+Honest scope, stated in the corner of the map: object *attributes* (size, scores, speed,
+eccentricity) are real public data; on-screen *positions* are illustrative, not computed ephemerides.
 
 ### Blind-spot dashboard (`blindspots.html`)
 
@@ -150,6 +156,7 @@ the blind-spot dashboard, and the open alert layer are next — see [the plan](#
 - [x] Hyperbolic / interstellar candidate triage with v∞ (`incoming triage`)
 - [x] Live NEOCP firehose screening — auto-triage unconfirmed discoveries (`incoming screen`)
 - [x] Bilingual, plain-language blind-spot dashboard (`blindspots.html`)
-- [ ] A windy.com-style interactive solar-system map (animated layers, time scrubber, click-anywhere)
+- [x] windy.com-style situational map — five toggleable layers, orbital animation, click-anywhere (`index.html`)
+- [ ] Real computed ephemerides (replace schematic positions with Kepler-propagated orbits from SBDB)
 - [ ] Email/webhook push when an object enters IMPACT-WATCH or is flagged interstellar
 - [ ] Signed, reproducible data releases
