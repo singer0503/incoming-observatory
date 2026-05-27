@@ -6,6 +6,7 @@ from pathlib import Path
 
 from incoming import alert as alert_mod
 from incoming import blindspots as blindspots_mod
+from incoming import orbits as orbits_mod
 from incoming import recompute as recompute_mod
 from incoming import screen as screen_mod
 from incoming import triage as triage_mod
@@ -49,6 +50,12 @@ def main(argv: list[str] | None = None) -> int:
         "blindspots", help="assemble the detection-blind-spot dashboard data (web/blindspots.html)"
     )
 
+    p_orb = sub.add_parser(
+        "orbits", help="export real Kepler positions/elements for the map (SBDB + planets)"
+    )
+    p_orb.add_argument("--live", action="store_true", help="fetch SBDB elements, update snapshot")
+    p_orb.add_argument("--top", type=int, default=40, help="number of top-risk objects to include")
+
     args = ap.parse_args(argv)
 
     if args.cmd == "ledger":
@@ -71,6 +78,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.cmd == "blindspots":
         blindspots_mod.build()
+        return 0
+    if args.cmd == "orbits":
+        orbits_mod.build(live=args.live, top_n=args.top)
         return 0
     return 1
 

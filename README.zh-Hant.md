@@ -114,8 +114,10 @@ cd web && python -m http.server 8000   # 然後開啟 http://localhost:8000
 - **點哪看哪**：點任何天體跳出詳情面板 —— 真實屬性（Palermo 等級、撞擊機率、離心率、v∞、NEO/PHA 分數）
   加上一句白話「為什麼重要」。
 
-誠實邊界（標在地圖角落）：天體的**屬性**（大小、分數、速度、離心率）是真實公開資料；
-螢幕上的**位置是示意的**，不是計算出來的精確星曆。
+位置是**真實的**：行星（標準 J2000 根數）與風險／星際天體（JPL SBDB 根數）都用真正的
+**克卜勒推進**定位（`incoming orbits` → `web/data/orbits.json`；數學原理見
+[`docs/ORBITAL_MECHANICS.md`](docs/ORBITAL_MECHANICS.md)，同一套解算也在瀏覽器裡跑，所以地圖是沿真實軌道動畫）。
+NEOCP 天體觀測弧只有幾小時，因此誠實地放在地球附近標為「不確定」，而非畫出一條假軌道。
 
 ### 盲區儀表板（`blindspots.html`）
 
@@ -148,6 +150,6 @@ cd web && python -m http.server 8000   # 然後開啟 http://localhost:8000
 - [x] 即時 NEOCP firehose 篩查 —— 對未確認新發現自動 triage（`incoming screen`）
 - [x] 中英雙語、白話的盲區儀表板（`blindspots.html`）
 - [x] windy.com 式即時態勢地圖 —— 五個可開關圖層、軌道動畫、任意點擊（`index.html`）
-- [ ] 真實計算星曆（用 SBDB 軌道根數做 Kepler 推進，取代示意位置）
+- [x] 用 SBDB 根數做真實 Kepler 推進的位置（`incoming orbits`；見 `docs/ORBITAL_MECHANICS.md`）
 - [ ] 進入 IMPACT-WATCH 或被標記星際時，email／webhook 推播
 - [ ] 簽章、可復現的資料釋出

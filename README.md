@@ -122,8 +122,11 @@ cd web && python -m http.server 8000   # then open http://localhost:8000
 - **Click anything** for a detail panel — real attributes (Palermo scale, impact probability,
   eccentricity, v∞, NEO/PHA scores) plus a plain-language "why it matters."
 
-Honest scope, stated in the corner of the map: object *attributes* (size, scores, speed,
-eccentricity) are real public data; on-screen *positions* are illustrative, not computed ephemerides.
+Positions are **real**: planets (standard J2000 elements) and risk/interstellar objects (JPL SBDB
+elements) are placed by genuine **Kepler propagation** (`incoming orbits` → `web/data/orbits.json`;
+the math is documented in [`docs/ORBITAL_MECHANICS.md`](docs/ORBITAL_MECHANICS.md) and the same
+solver runs in the browser so the map animates on true orbits). NEOCP objects have arcs of only
+hours, so they are honestly shown near Earth as "uncertain" rather than on a fabricated orbit.
 
 ### Blind-spot dashboard (`blindspots.html`)
 
@@ -157,6 +160,6 @@ the blind-spot dashboard, and the open alert layer are next — see [the plan](#
 - [x] Live NEOCP firehose screening — auto-triage unconfirmed discoveries (`incoming screen`)
 - [x] Bilingual, plain-language blind-spot dashboard (`blindspots.html`)
 - [x] windy.com-style situational map — five toggleable layers, orbital animation, click-anywhere (`index.html`)
-- [ ] Real computed ephemerides (replace schematic positions with Kepler-propagated orbits from SBDB)
+- [x] Real Kepler-propagated positions from SBDB elements (`incoming orbits`; see `docs/ORBITAL_MECHANICS.md`)
 - [ ] Email/webhook push when an object enters IMPACT-WATCH or is flagged interstellar
 - [ ] Signed, reproducible data releases
