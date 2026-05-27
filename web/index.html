@@ -88,7 +88,7 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 
-const SCALE = 6;            // scene units per au (Earth ~6 units from the Sun)
+const SCALE = 10;           // scene units per au (Earth ~10 units from the Sun) — roomy inner system
 const app = document.getElementById("app");
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -424,8 +424,8 @@ const clock = document.getElementById("clock");
   if (earthEl) earthGroup.position.copy(posOf(earthEl, jd));
   earthMesh.rotation.y += dt * 0.22;
   earthClouds.rotation.y += dt * 0.30;
-  const ma = simDays * (2 * Math.PI / 27.3);   // Moon's ~27.3-day orbit around Earth (illustrative)
-  moon.position.set(Math.cos(ma) * 2.0, Math.sin(ma) * 0.3, Math.sin(ma) * 2.0);
+  const ma = simDays * (2 * Math.PI / 27.3);   // Moon's ~27.3-day orbit around Earth (illustrative, kept close)
+  moon.position.set(Math.cos(ma) * 1.5, Math.sin(ma) * 0.25, Math.sin(ma) * 1.5);
   moon.rotation.y += dt * 0.05;
   orbitBodies.forEach(o => o.mesh.position.copy(posOf(o.el, jd)));
   if (sunwardCone && earthEl) { sunwardCone.position.copy(earthGroup.position).multiplyScalar(0.5); sunwardCone.lookAt(0,0,0); sunwardCone.rotateX(Math.PI/2); }
