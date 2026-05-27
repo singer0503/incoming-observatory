@@ -108,11 +108,7 @@ controls.screenSpacePanning = true;
 controls.minDistance = 1.2;
 controls.maxDistance = 6000;
 
-// real Milky Way backdrop (three.js example panorama) — falls back to plain starfield
-new THREE.TextureLoader().load(
-  "https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/textures/2294472375_24a3b8ef46_o.jpg",
-  (t) => { t.mapping = THREE.EquirectangularReflectionMapping; t.colorSpace = THREE.SRGBColorSpace; scene.background = t; },
-  undefined, () => {});
+scene.background = new THREE.Color(0x04050c);   // deep space (starfield built below)
 
 // cinematic bloom — the main "this is real" upgrade
 const composer = new EffectComposer(renderer);
@@ -125,17 +121,37 @@ scene.add(new THREE.AmbientLight(0x33405c, 0.5));          // fill so night side
 const sunLight = new THREE.PointLight(0xfff2d6, 2.6, 0, 1.3);
 scene.add(sunLight);
 
-// layered starfield with slight colour/size variation
+// procedural deep-space backdrop: a star sphere + a tilted Milky Way band (no external image)
 (() => {
-  const n = 6500, p = new Float32Array(n * 3), col = new Float32Array(n * 3);
-  for (let i = 0; i < n; i++) {
-    p[i*3] = (Math.random()-0.5)*9000; p[i*3+1] = (Math.random()-0.5)*9000; p[i*3+2] = (Math.random()-0.5)*9000;
-    const t = 0.6 + Math.random()*0.4; col[i*3]=t; col[i*3+1]=t; col[i*3+2]=Math.min(1, t+0.1);
-  }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute("position", new THREE.BufferAttribute(p, 3));
-  g.setAttribute("color", new THREE.BufferAttribute(col, 3));
-  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ size: 1.1, vertexColors: true, sizeAttenuation: true })));
+  const tiltX = 0.5, tiltZ = 0.3;
+  const rotBand = (x, y, z) => {
+    const y1 = y*Math.cos(tiltX) - z*Math.sin(tiltX), z1 = y*Math.sin(tiltX) + z*Math.cos(tiltX);
+    return [x*Math.cos(tiltZ) - y1*Math.sin(tiltZ), x*Math.sin(tiltZ) + y1*Math.cos(tiltZ), z1];
+  };
+  const build = (count, R, band) => {
+    const p = new Float32Array(count*3), c = new Float32Array(count*3);
+    for (let i = 0; i < count; i++) {
+      let d;
+      if (band) {
+        const u = Math.random()*Math.PI*2, v = (Math.random()+Math.random()+Math.random()-1.5)*0.16;
+        d = rotBand(Math.cos(u), v, Math.sin(u));
+      } else {
+        const th = Math.random()*Math.PI*2, ph = Math.acos(2*Math.random()-1);
+        d = [Math.sin(ph)*Math.cos(th), Math.cos(ph), Math.sin(ph)*Math.sin(th)];
+      }
+      const r = R*(0.92+Math.random()*0.08);
+      p[i*3]=d[0]*r; p[i*3+1]=d[1]*r; p[i*3+2]=d[2]*r;
+      const t = band ? 0.7+Math.random()*0.3 : 0.55+Math.random()*0.45;
+      c[i*3]=t; c[i*3+1]=t*0.97; c[i*3+2]=Math.min(1, t+0.12);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(p, 3));
+    g.setAttribute("color", new THREE.BufferAttribute(c, 3));
+    return new THREE.Points(g, new THREE.PointsMaterial({ size: band?1.3:1.6, vertexColors: true,
+      sizeAttenuation: false, transparent: true, opacity: band?0.65:0.9, depthWrite: false }));
+  };
+  scene.add(build(9000, 3000, false));
+  scene.add(build(7000, 2950, true));   // the Milky Way band
 })();
 
 function hash01(s) { let h = 2166136261; s = String(s);
@@ -199,12 +215,17 @@ const TEX = "https://cdn.jsdelivr.net/gh/jeromeetienne/threex.planets@master/ima
 const texLoader = new THREE.TextureLoader();
 function loadTex(url, onset) { texLoader.load(url, (t) => { t.colorSpace = THREE.SRGBColorSpace; onset(t); }, undefined, () => {}); }
 
-// ---- the Sun: molten-orange photosphere + warm corona (bloom finishes it) ----
-const sunMat = new THREE.MeshBasicMaterial({ color: 0xff7a1e });   // orange tint -> lava look, not white blow-out
-loadTex(TEX + "sunmap.jpg", (t) => { sunMat.map = t; sunMat.color.set(0xff8c2e); sunMat.needsUpdate = true; });
-const sun = new THREE.Mesh(new THREE.SphereGeometry(0.85, 48, 48), sunMat);
-sun.add(glowSprite("rgba(255,135,40,0.55)", 2.4));
-sun.add(glowSprite("rgba(255,80,15,0.22)", 4.4));
+// ---- the Sun: molten-orange photosphere with animated lava detail ----
+const sunMat = new THREE.MeshBasicMaterial({ color: 0xff5208 });   // deep orange tint -> lava, not white
+loadTex(TEX + "sunmap.jpg", (t) => { t.wrapS = t.wrapT = THREE.RepeatWrapping; sunMat.map = t; sunMat.color.set(0xff5e0e); sunMat.needsUpdate = true; });
+const sun = new THREE.Mesh(new THREE.SphereGeometry(0.85, 64, 64), sunMat);
+// a second, counter-rotating additive layer makes the surface look like it's churning
+const sunLavaMat = new THREE.MeshBasicMaterial({ color: 0xff7a18, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending });
+loadTex(TEX + "sunmap.jpg", (t) => { t.wrapS = t.wrapT = THREE.RepeatWrapping; sunLavaMat.map = t; sunLavaMat.needsUpdate = true; });
+const sunLava = new THREE.Mesh(new THREE.SphereGeometry(0.862, 64, 64), sunLavaMat);
+sun.add(sunLava);
+sun.add(glowSprite("rgba(255,105,20,0.55)", 2.5));
+sun.add(glowSprite("rgba(255,55,8,0.22)", 4.6));
 scene.add(sun);
 const sunLabel = makeLabel("Sun", "#ffd27a"); sunLabel.position.set(0, 1.6, 0); sun.add(sunLabel);
 
@@ -387,6 +408,11 @@ const clock = document.getElementById("clock");
   const dt = Math.min(clock3.getDelta(), 0.1);
   if (playing) simDays += speed * dt * 4;          // speed 1.5 ≈ 6 days / second (gentle)
   const jd = EPOCH + simDays;
+  // churning lava: two textured layers drift/rotate against each other
+  sun.rotation.y += dt * 0.03;
+  sunLava.rotation.y -= dt * 0.055; sunLava.rotation.x += dt * 0.012;
+  if (sunMat.map) sunMat.map.offset.x += dt * 0.004;
+  if (sunLavaMat.map) sunLavaMat.map.offset.x -= dt * 0.006;
   if (earthEl) earthGroup.position.copy(posOf(earthEl, jd));
   earthMesh.rotation.y += dt * 0.22;
   earthClouds.rotation.y += dt * 0.30;
