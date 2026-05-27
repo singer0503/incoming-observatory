@@ -29,7 +29,11 @@
   .layer .ct { color:var(--muted); font-variant-numeric:tabular-nums; }
   .layer.off { opacity:.4; }
   .layer.off .dot { box-shadow:none; background:#33415c !important; }
-  #detail { top:58px; right:14px; width:286px; display:none; }
+  #cine { top:58px; right:14px; cursor:pointer; color:#e8eef6; font:inherit; padding:8px 14px;
+    border:1px solid var(--line); display:flex; align-items:center; gap:7px; }
+  #cine:hover { background:#152034; }
+  #cine.on { background:#c0392b; border-color:#ff6b5e; }
+  #detail { top:104px; right:14px; width:286px; display:none; }
   #detail .close { float:right; cursor:pointer; color:var(--muted); }
   #detail h3 { margin:0 0 4px; font-size:16px; }
   #detail .cat { display:inline-block; padding:1px 9px; border-radius:999px; font-size:11px; margin-bottom:8px; }
@@ -59,6 +63,7 @@
   <span class="mission">Human civilization is young — let's see it coming. 別在成為跨星球文明前，被沒看見的天體終結。</span>
 </nav>
 <div id="layers" class="panel"><h2>Layers · 圖層</h2><div id="layerList"></div></div>
+<button id="cine" class="panel" title="cycle cinematic viewpoints">🎬 <span>最佳視角 · Cinematic</span></button>
 <div id="detail" class="panel"><span class="close" onclick="this.parentNode.style.display='none'">✕</span>
   <h3 id="d-title"></h3><div id="d-cat"></div><div id="d-body"></div><div class="why" id="d-why"></div></div>
 <div id="tip">drag to orbit · right-drag / two-finger to pan · scroll to zoom · click any object</div>
@@ -429,11 +434,34 @@ renderer.domElement.addEventListener("click", (e) => {
   document.getElementById("d-why").textContent = u.why || ""; p.style.display = "block";
 });
 
-let view = "sun", playing = true, speed = 1.5, simDays = 0, EPOCH = 0, retarget = null;
+let view = "sun", playing = true, speed = 1.5, simDays = 0, EPOCH = 0, retarget = null, fly = null;
+controls.autoRotate = false; controls.autoRotateSpeed = 0.25;
+
+function flyTo(p1, t1, dur = 2.6) {   // smooth cinematic camera move
+  fly = { p0: camera.position.clone(), p1: p1.clone(), tg0: controls.target.clone(), tg1: t1.clone(), e: 0, dur };
+  controls.enabled = false;
+}
 document.querySelectorAll("#views button").forEach(b => b.addEventListener("click", () => {
   view = b.dataset.view; document.querySelectorAll("#views button").forEach(x => x.classList.toggle("on", x===b));
-  // one-shot recenter; afterwards the camera stays free to orbit/pan/zoom
+  controls.autoRotate = false; controls.enabled = true; fly = null;
+  document.getElementById("cine").classList.remove("on");
   retarget = view === "earth" ? earthGroup.position.clone() : new THREE.Vector3(0, 0, 0); }));
+
+// "Best viewing angle" — cycle curated cinematic viewpoints + gentle auto-rotate (living wallpaper)
+const cinePresets = [
+  { pos: new THREE.Vector3(0, 46, 92), tgt: new THREE.Vector3(0, 0, 0) },   // elevated 3/4 (overview)
+  { pos: new THREE.Vector3(0, 12, 84), tgt: new THREE.Vector3(0, 0, 0) },   // low, near edge-on (dramatic)
+  { pos: new THREE.Vector3(30, 72, 52), tgt: new THREE.Vector3(0, 0, 0) },  // high banking angle
+];
+let cineIdx = -1;
+document.getElementById("cine").addEventListener("click", () => {
+  cineIdx = (cineIdx + 1) % cinePresets.length;
+  const pr = cinePresets[cineIdx];
+  flyTo(pr.pos, pr.tgt);
+  controls.autoRotate = true;
+  retarget = null;
+  document.getElementById("cine").classList.add("on");
+});
 document.getElementById("play").addEventListener("click", function(){ playing=!playing; this.textContent = playing?"⏸":"▶"; });
 document.getElementById("speed").addEventListener("input", e => speed = parseFloat(e.target.value));
 
@@ -472,11 +500,20 @@ const clock = document.getElementById("clock");
   moon.rotation.y += dt * 0.05;
   orbitBodies.forEach(o => o.mesh.position.copy(posOf(o.el, jd)));
   if (sunwardCone && earthEl) { sunwardCone.position.copy(earthGroup.position).multiplyScalar(0.5); sunwardCone.lookAt(0,0,0); sunwardCone.rotateX(Math.PI/2); }
-  // camera is free; only ease the target when a view preset was just clicked
-  if (retarget) { controls.target.lerp(retarget, 0.12); if (controls.target.distanceTo(retarget) < 0.05) retarget = null; }
+  if (fly) {                          // smooth cinematic fly-to (easeInOut)
+    fly.e += dt; const k = Math.min(1, fly.e / fly.dur);
+    const s = k < 0.5 ? 2*k*k : 1 - Math.pow(-2*k + 2, 2) / 2;
+    camera.position.lerpVectors(fly.p0, fly.p1, s);
+    controls.target.lerpVectors(fly.tg0, fly.tg1, s);
+    camera.lookAt(controls.target);
+    if (k >= 1) { controls.enabled = true; fly = null; }
+  } else if (retarget) {              // one-shot recenter from Sun/Earth view buttons
+    controls.target.lerp(retarget, 0.12); if (controls.target.distanceTo(retarget) < 0.05) retarget = null;
+  }
   const date = new Date((EPOCH - 2440587.5)*86400000 + simDays*86400000);
   clock.textContent = `T+ ${Math.round(simDays)} d · ${isNaN(date)?"":date.toISOString().slice(0,10)}`;
-  controls.update(); composer.render();
+  if (!fly) controls.update();        // controls.update drives auto-rotate + damping when not flying
+  composer.render();
 })();
 </script>
 </body>
