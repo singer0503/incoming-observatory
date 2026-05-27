@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+.ruff_cache/
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# cached upstream API snapshots (pinned by hash in provenance, not committed raw)
+cache/
+# generated outputs
+outputs/
+*.parquet
+provenance.json

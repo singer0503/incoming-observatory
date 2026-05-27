@@ -1,0 +1,132 @@
+[
+  {
+    "designation":"2008 TC3",
+    "kind":"asteroid",
+    "impact_utc":"2008-10-07T02:46:00Z",
+    "detected_before_impact":true,
+    "warning_hours":19.0,
+    "blindspot":"short_arc",
+    "location":"Nubian Desert (Sudan)",
+    "source":"https:\/\/cneos.jpl.nasa.gov\/"
+  },
+  {
+    "designation":"2014 AA",
+    "kind":"asteroid",
+    "impact_utc":"2014-01-02T03:02:00Z",
+    "detected_before_impact":true,
+    "warning_hours":21.0,
+    "blindspot":"short_arc",
+    "location":"Atlantic Ocean",
+    "source":"https:\/\/cneos.jpl.nasa.gov\/"
+  },
+  {
+    "designation":"2018 LA",
+    "kind":"asteroid",
+    "impact_utc":"2018-06-02T16:44:00Z",
+    "detected_before_impact":true,
+    "warning_hours":8.0,
+    "blindspot":"short_arc",
+    "location":"Botswana",
+    "source":"https:\/\/cneos.jpl.nasa.gov\/news\/news198.html"
+  },
+  {
+    "designation":"2019 MO",
+    "kind":"asteroid",
+    "impact_utc":"2019-06-22T21:25:00Z",
+    "detected_before_impact":true,
+    "warning_hours":12.0,
+    "blindspot":"short_arc",
+    "location":"Caribbean Sea",
+    "source":"https:\/\/cneos.jpl.nasa.gov\/"
+  },
+  {
+    "designation":"2022 EB5",
+    "kind":"asteroid",
+    "impact_utc":"2022-03-11T21:22:00Z",
+    "detected_before_impact":true,
+    "warning_hours":2.0,
+    "blindspot":"short_arc",
+    "location":"Norwegian Sea",
+    "source":"https:\/\/cneos.jpl.nasa.gov\/news\/news207.html"
+  },
+  {
+    "designation":"2022 WJ1",
+    "kind":"asteroid",
+    "impact_utc":"2022-11-19T08:27:00Z",
+    "detected_before_impact":true,
+    "warning_hours":3.5,
+    "blindspot":"short_arc",
+    "location":"Lake Ontario (Canada\/US)",
+    "source":"https:\/\/cneos.jpl.nasa.gov\/"
+  },
+  {
+    "designation":"2023 CX1",
+    "kind":"asteroid",
+    "impact_utc":"2023-02-13T02:59:00Z",
+    "detected_before_impact":true,
+    "warning_hours":7.0,
+    "blindspot":"short_arc",
+    "location":"northern France",
+    "source":"https:\/\/www.esa.int\/Space_Safety\/Planetary_Defence\/"
+  },
+  {
+    "designation":"2024 BX1",
+    "kind":"asteroid",
+    "impact_utc":"2024-01-21T00:32:00Z",
+    "detected_before_impact":true,
+    "warning_hours":3.0,
+    "blindspot":"short_arc",
+    "location":"near Berlin (Germany)",
+    "source":"https:\/\/www.esa.int\/Space_Safety\/Planetary_Defence\/Asteroid_2024_BX1_spotted_three_hours_before_impact"
+  },
+  {
+    "designation":"2024 RW1",
+    "kind":"asteroid",
+    "impact_utc":"2024-09-04T16:39:00Z",
+    "detected_before_impact":true,
+    "warning_hours":8.0,
+    "blindspot":"short_arc",
+    "location":"Luzon (Philippines)",
+    "source":"https:\/\/cneos.jpl.nasa.gov\/"
+  },
+  {
+    "designation":"2024 UQ",
+    "kind":"asteroid",
+    "impact_utc":"2024-10-22T10:54:00Z",
+    "detected_before_impact":true,
+    "warning_hours":2.0,
+    "blindspot":"short_arc",
+    "location":"Pacific Ocean",
+    "source":"https:\/\/cneos.jpl.nasa.gov\/"
+  },
+  {
+    "designation":"2024 XA1",
+    "kind":"asteroid",
+    "impact_utc":"2024-12-03T16:15:00Z",
+    "detected_before_impact":true,
+    "warning_hours":12.0,
+    "blindspot":"short_arc",
+    "location":"Sakha (Siberia)",
+    "source":"https:\/\/www.esa.int\/Space_Safety\/Planetary_Defence\/"
+  },
+  {
+    "designation":"Chelyabinsk",
+    "kind":"asteroid",
+    "impact_utc":"2013-02-15T03:20:00Z",
+    "detected_before_impact":false,
+    "warning_hours":0.0,
+    "blindspot":"sunward",
+    "location":"Chelyabinsk Oblast (Russia)",
+    "source":"https:\/\/en.wikipedia.org\/wiki\/Chelyabinsk_meteor"
+  },
+  {
+    "designation":"Tunguska",
+    "kind":"asteroid",
+    "impact_utc":"1908-06-30T00:14:00Z",
+    "detected_before_impact":false,
+    "warning_hours":0.0,
+    "blindspot":"none",
+    "location":"Tunguska (Siberia)",
+    "source":"https:\/\/en.wikipedia.org\/wiki\/Tunguska_event"
+  }
+]

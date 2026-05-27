@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "incoming-observatory warning record",
+  "description": "One Earth-arriving object and how much warning we had.",
+  "type": "object",
+  "required": ["designation", "kind", "detected_before_impact", "warning_hours", "blindspot"],
+  "properties": {
+    "designation": { "type": "string" },
+    "kind": { "type": "string", "enum": ["asteroid", "comet", "interstellar", "unknown"] },
+    "impact_utc": { "type": ["string", "null"], "format": "date-time" },
+    "detected_before_impact": { "type": "boolean" },
+    "warning_hours": {
+      "type": "number",
+      "minimum": 0,
+      "description": "First detection -> arrival, in hours. 0 means not detected before impact."
+    },
+    "blindspot": {
+      "type": "string",
+      "enum": ["sunward", "long_period_comet", "interstellar", "short_arc", "none"]
+    },
+    "location": { "type": "string" },
+    "source": { "type": "string" }
+  }
+}

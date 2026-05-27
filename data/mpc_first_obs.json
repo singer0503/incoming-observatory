@@ -1,0 +1,90 @@
+{
+  "2008 TC3": {
+    "designation": "2008 TC3",
+    "fetched_utc": "2026-05-27T04:04:09.577897+00:00",
+    "first_obs_jd": 2454745.77767,
+    "first_obs_utc": "2008-10-06T06:39:50.688019+00:00",
+    "n_obs": 883,
+    "source": "IAU Minor Planet Center via astroquery.mpc.get_observations"
+  },
+  "2014 AA": {
+    "designation": "2014 AA",
+    "fetched_utc": "2026-05-27T04:04:12.002625+00:00",
+    "first_obs_jd": 2456658.76257,
+    "first_obs_utc": "2014-01-01T06:18:06.047982+00:00",
+    "n_obs": 7,
+    "source": "IAU Minor Planet Center via astroquery.mpc.get_observations"
+  },
+  "2018 LA": {
+    "designation": "2018 LA",
+    "fetched_utc": "2026-05-27T04:04:15.181069+00:00",
+    "first_obs_jd": 2458271.843295,
+    "first_obs_utc": "2018-06-02T08:14:20.688002+00:00",
+    "n_obs": 15,
+    "source": "IAU Minor Planet Center via astroquery.mpc.get_observations"
+  },
+  "2019 MO": {
+    "designation": "2019 MO",
+    "fetched_utc": "2026-05-27T04:04:17.524532+00:00",
+    "first_obs_jd": 2458656.829285,
+    "first_obs_utc": "2019-06-22T07:54:10.223999+00:00",
+    "n_obs": 7,
+    "source": "IAU Minor Planet Center via astroquery.mpc.get_observations"
+  },
+  "2022 EB5": {
+    "designation": "2022 EB5",
+    "fetched_utc": "2026-05-27T04:04:20.567422+00:00",
+    "first_obs_jd": 2459650.308476,
+    "first_obs_utc": "2022-03-11T19:24:12.326408+00:00",
+    "n_obs": 178,
+    "source": "IAU Minor Planet Center via astroquery.mpc.get_observations"
+  },
+  "2022 WJ1": {
+    "designation": "2022 WJ1",
+    "fetched_utc": "2026-05-27T04:04:24.024250+00:00",
+    "first_obs_jd": 2459902.703482,
+    "first_obs_utc": "2022-11-19T04:53:00.844814+00:00",
+    "n_obs": 51,
+    "source": "IAU Minor Planet Center via astroquery.mpc.get_observations"
+  },
+  "2023 CX1": {
+    "designation": "2023 CX1",
+    "fetched_utc": "2026-05-27T04:04:27.961472+00:00",
+    "first_obs_jd": 2459988.345917,
+    "first_obs_utc": "2023-02-12T20:18:07.228797+00:00",
+    "n_obs": 368,
+    "source": "IAU Minor Planet Center via astroquery.mpc.get_observations"
+  },
+  "2024 BX1": {
+    "designation": "2024 BX1",
+    "fetched_utc": "2026-05-27T04:04:31.505486+00:00",
+    "first_obs_jd": 2460330.40865,
+    "first_obs_utc": "2024-01-20T21:48:27.360010+00:00",
+    "n_obs": 328,
+    "source": "IAU Minor Planet Center via astroquery.mpc.get_observations"
+  },
+  "2024 RW1": {
+    "designation": "2024 RW1",
+    "fetched_utc": "2026-05-27T04:04:34.683287+00:00",
+    "first_obs_jd": 2460557.738671,
+    "first_obs_utc": "2024-09-04T05:43:41.174410+00:00",
+    "n_obs": 185,
+    "source": "IAU Minor Planet Center via astroquery.mpc.get_observations"
+  },
+  "2024 UQ": {
+    "designation": "2024 UQ",
+    "fetched_utc": "2026-05-27T04:04:37.057269+00:00",
+    "first_obs_jd": 2460605.827039,
+    "first_obs_utc": "2024-10-22T07:50:56.169610+00:00",
+    "n_obs": 9,
+    "source": "IAU Minor Planet Center via astroquery.mpc.get_observations"
+  },
+  "2024 XA1": {
+    "designation": "2024 XA1",
+    "fetched_utc": "2026-05-27T04:04:39.740082+00:00",
+    "first_obs_jd": 2460647.701232,
+    "first_obs_utc": "2024-12-03T04:49:46.444782+00:00",
+    "n_obs": 79,
+    "source": "IAU Minor Planet Center via astroquery.mpc.get_observations"
+  }
+}
