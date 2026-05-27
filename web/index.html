@@ -218,14 +218,14 @@ function loadTex(url, onset) { texLoader.load(url, (t) => { t.colorSpace = THREE
 // ---- the Sun: molten-orange photosphere with animated lava detail ----
 const sunMat = new THREE.MeshBasicMaterial({ color: 0xff5208 });   // deep orange tint -> lava, not white
 loadTex(TEX + "sunmap.jpg", (t) => { t.wrapS = t.wrapT = THREE.RepeatWrapping; sunMat.map = t; sunMat.color.set(0xff5e0e); sunMat.needsUpdate = true; });
-const sun = new THREE.Mesh(new THREE.SphereGeometry(0.85, 64, 64), sunMat);
+const sun = new THREE.Mesh(new THREE.SphereGeometry(1.5, 64, 64), sunMat);
 // a second, counter-rotating additive layer makes the surface look like it's churning
 const sunLavaMat = new THREE.MeshBasicMaterial({ color: 0xff7a18, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending });
 loadTex(TEX + "sunmap.jpg", (t) => { t.wrapS = t.wrapT = THREE.RepeatWrapping; sunLavaMat.map = t; sunLavaMat.needsUpdate = true; });
-const sunLava = new THREE.Mesh(new THREE.SphereGeometry(0.862, 64, 64), sunLavaMat);
+const sunLava = new THREE.Mesh(new THREE.SphereGeometry(1.52, 64, 64), sunLavaMat);
 sun.add(sunLava);
-sun.add(glowSprite("rgba(255,105,20,0.55)", 2.5));
-sun.add(glowSprite("rgba(255,55,8,0.22)", 4.6));
+sun.add(glowSprite("rgba(255,105,20,0.55)", 4.4));
+sun.add(glowSprite("rgba(255,55,8,0.22)", 8.0));
 scene.add(sun);
 const sunLabel = makeLabel("Sun", "#ffd27a"); sunLabel.position.set(0, 1.6, 0); sun.add(sunLabel);
 
@@ -235,26 +235,34 @@ loadTex("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/textures/planets/ea
   (t) => { earthMat.map = t; earthMat.color.set(0xffffff); earthMat.needsUpdate = true; });
 loadTex(TEX + "earthbump1k.jpg", (t) => { earthMat.bumpMap = t; earthMat.bumpScale = 0.04; earthMat.needsUpdate = true; });
 loadTex(TEX + "earthlights1k.jpg", (t) => { earthMat.emissiveMap = t; earthMat.emissive.set(0xffd9a0); earthMat.emissiveIntensity = 0.9; earthMat.needsUpdate = true; });
-const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 64, 64), earthMat);
+const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(0.9, 64, 64), earthMat);
 earthGroup.add(earthMesh);
 // cloud layer (rotates a touch faster than the surface)
 const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, depthWrite: false });
-const earthClouds = new THREE.Mesh(new THREE.SphereGeometry(0.515, 48, 48), cloudMat);
+const earthClouds = new THREE.Mesh(new THREE.SphereGeometry(0.925, 48, 48), cloudMat);
 loadTex(TEX + "earthcloudmap.jpg", (t) => { cloudMat.alphaMap = t; cloudMat.needsUpdate = true; });
 earthGroup.add(earthClouds);
-const atmo = new THREE.Mesh(new THREE.SphereGeometry(0.6, 32, 32),
+const atmo = new THREE.Mesh(new THREE.SphereGeometry(1.05, 32, 32),
   new THREE.MeshBasicMaterial({ color: 0x4aa3ff, transparent: true, opacity: 0.18, side: THREE.BackSide, blending: THREE.AdditiveBlending }));
 earthGroup.add(atmo);
-const earthLabel = makeLabel("Earth", "#7db2ff"); earthLabel.position.set(0, 0.95, 0); earthGroup.add(earthLabel);
+const earthLabel = makeLabel("Earth", "#7db2ff"); earthLabel.position.set(0, 1.4, 0); earthGroup.add(earthLabel);
+
+// the Moon — orbits Earth (illustrative circular orbit; it's near Earth, not a fake heliocentric orbit)
+const moonMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 1.0 });
+loadTex(TEX + "moonmap1k.jpg", (t) => { moonMat.map = t; moonMat.color.set(0xffffff); moonMat.needsUpdate = true; });
+const moon = new THREE.Mesh(new THREE.SphereGeometry(0.26, 40, 40), moonMat);
+moon.userData = { title: "Moon", cat: "Moon", catColor: "#cfd6e0", body: "", why: "Earth's natural satellite (orbit shown illustratively)." };
+earthGroup.add(moon);
+const moonLabel = makeLabel("Moon", "#cfd6e0"); moonLabel.position.set(0, 0.5, 0); moon.add(moonLabel);
 let earthEl = null;
 
 const PLANET_COLOR = { Mercury: 0x9c8b7a, Venus: 0xd8b46a, Mars: 0xc1502f,
   Jupiter: 0xd8b48c, Saturn: 0xe3d4a8, Uranus: 0x9fe0e6, Neptune: 0x4f6cd8 };
 const PLANET_TEX = { Mercury: TEX+"mercurymap.jpg", Venus: TEX+"venusmap.jpg", Mars: TEX+"marsmap1k.jpg",
   Jupiter: TEX+"jupitermap.jpg", Saturn: TEX+"saturnmap.jpg", Uranus: TEX+"uranusmap.jpg", Neptune: TEX+"neptunemap.jpg" };
-const PLANET_SIZE = { Mercury: 0.18, Venus: 0.30, Mars: 0.24, Jupiter: 0.95, Saturn: 0.82, Uranus: 0.60, Neptune: 0.58 };
+const PLANET_SIZE = { Mercury: 0.34, Venus: 0.55, Mars: 0.42, Jupiter: 1.7, Saturn: 1.45, Uranus: 1.05, Neptune: 1.0 };
 const PLANET_BUMP = { Mercury: TEX+"mercurybump.jpg", Venus: TEX+"venusbump.jpg", Mars: TEX+"marsbump1k.jpg" };
-const pickable = [];
+const pickable = [moon];
 const orbitBodies = [];
 const layers = {
   close:        { color: "#ff9500", icon: "☄️", label: "Close approaches", sub: "撞擊前才發現的歷史紀錄", objs: [], on: true },
@@ -416,6 +424,9 @@ const clock = document.getElementById("clock");
   if (earthEl) earthGroup.position.copy(posOf(earthEl, jd));
   earthMesh.rotation.y += dt * 0.22;
   earthClouds.rotation.y += dt * 0.30;
+  const ma = simDays * (2 * Math.PI / 27.3);   // Moon's ~27.3-day orbit around Earth (illustrative)
+  moon.position.set(Math.cos(ma) * 2.0, Math.sin(ma) * 0.3, Math.sin(ma) * 2.0);
+  moon.rotation.y += dt * 0.05;
   orbitBodies.forEach(o => o.mesh.position.copy(posOf(o.el, jd)));
   if (sunwardCone && earthEl) { sunwardCone.position.copy(earthGroup.position).multiplyScalar(0.5); sunwardCone.lookAt(0,0,0); sunwardCone.rotateX(Math.PI/2); }
   // camera is free; only ease the target when a view preset was just clicked
